@@ -134,3 +134,51 @@ body[data-theme="dark"] #sun-icon path {
 body[data-theme="dark"] #moon-icon path {
   fill: #ffffff;
 }
+
+/* 
+################################
+######## MODAL STYLES ##########
+################################
+*/
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.modal-content h2 {
+  margin: 0 0 10px;
+}
+
+[data-theme="light"] .modal-content {
+  background: white;
+  color: black;
+}
+
+[data-theme="dark"] .modal-content {
+  background: #333;
+  color: white;
+}
+
+.modal button {
+  margin: 5px;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal button:hover {
+  opacity: 0.8;
+}

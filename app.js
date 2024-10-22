@@ -8,10 +8,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeIcon = document.getElementById("theme-icon");
   const sunIcon = document.getElementById("sun-icon");
   const moonIcon = document.getElementById("moon-icon");
+  const confirmModal = document.getElementById("confirm-modal");
+  const confirmMessage = document.getElementById("confirm-message");
 
   const checkAuth = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
+      // Update the modal with the user's display name
+      document.getElementById("user-name").textContent = user.displayName;
+
       const menu = document.createElement("ul");
       menu.className = "navbar-menu";
       menu.innerHTML = `
@@ -36,13 +41,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const showConfirmMessage = (displayName) => {
+    confirmMessage.textContent = `Want to clear all data for ${displayName}?`;
+  };
+
   const addNavbarEventListeners = () => {
     const menu = navbar.querySelector(".navbar-menu");
     if (menu) {
       menu.addEventListener("click", (e) => {
         if (e.target.id === "sign-out-link") {
-          localStorage.removeItem("user");
-          checkAuth();
+          confirmModal.style.display = "flex"; // Show the confirmation modal
         } else if (e.target.id === "settings-link") {
           settingsContainer.style.display = "block";
         }
@@ -62,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const editDecksBtn = document.getElementById("edit-decks");
       if (editDecksBtn) {
         editDecksBtn.addEventListener("click", () => {
-          // TODO: EDIT DECK FUNCTIONALITY
           console.log("Edit decks clicked");
         });
       }
@@ -70,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const resetDecksBtn = document.getElementById("reset-decks");
       if (resetDecksBtn) {
         resetDecksBtn.addEventListener("click", () => {
-          // TODO: RESET DECK FUNCTIONALITY
           console.log("Reset decks clicked");
         });
       }
@@ -89,21 +95,38 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   };
 
-  // Set initial theme
   const savedTheme = localStorage.getItem("theme") || "light";
   themeToggle.checked = savedTheme === "dark";
   updateTheme(savedTheme === "dark");
 
-  // Theme toggle click handler
   themeIcon.addEventListener("click", () => {
     themeToggle.checked = !themeToggle.checked;
     const isDark = themeToggle.checked;
     updateTheme(isDark);
   });
 
-  // Theme toggle change handler
   themeToggle.addEventListener("change", (e) => {
     updateTheme(e.target.checked);
+  });
+
+  // Confirm modal actions
+  document.getElementById("confirm-yes").addEventListener("click", () => {
+    localStorage.clear();
+    confirmModal.style.display = "none";
+    alert("Local storage cleared. You have been signed out.");
+    checkAuth();
+  });
+
+  document.getElementById("confirm-no").addEventListener("click", () => {
+    confirmModal.style.display = "none";
+    alert("You have been signed out. Your data remains.");
+    localStorage.removeItem("user");
+    checkAuth();
+  });
+
+  // Add functionality for the Cancel button
+  document.getElementById("confirm-cancel").addEventListener("click", () => {
+    confirmModal.style.display = "none"; // Close the modal
   });
 
   checkAuth();

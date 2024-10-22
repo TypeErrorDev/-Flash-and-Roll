@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="shortcut icon"
+      href="/purple-icons8-dice-64.png"
+      type="image/x-icon"
+    />
     <title>Flashcard App</title>
   </head>
   <body>
@@ -71,6 +76,17 @@
       </div>
       <div>
         <button id="go-home-link">Go Back Home</button>
+      </div>
+    </div>
+
+    <div id="confirm-modal" class="modal">
+      <div class="modal-content">
+        <h2 id="confirm-message">
+          Want to clear all data for <span id="user-name"></span>?
+        </h2>
+        <button id="confirm-yes">Yes</button>
+        <button id="confirm-no">No</button>
+        <button id="confirm-cancel">Cancel</button>
       </div>
     </div>
 
