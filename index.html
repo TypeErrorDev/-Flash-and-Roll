@@ -9,11 +9,14 @@
       href="/purple-icons8-dice-64.png"
       type="image/x-icon"
     />
-    <title>Flashcard App</title>
+    <title>Study Stack</title>
   </head>
   <body>
+    <!-- ===========================
+         Navigation Bar
+         =========================== -->
     <nav class="navbar" id="navbar">
-      <div class="navbar-brand">Flashcard App</div>
+      <div class="navbar-brand">StudyStack</div>
       <div id="theme-icon" style="cursor: pointer">
         <svg
           id="sun-icon"
@@ -48,6 +51,10 @@
         </svg>
       </div>
     </nav>
+
+    <!-- ===========================
+    Authentication Container
+    =========================== -->
     <div id="auth-container">
       <form id="auth-form">
         <input
@@ -60,6 +67,14 @@
       </form>
     </div>
 
+    <!-- ===========================
+         Decks Container
+         =========================== -->
+    <div id="decks-container"></div>
+
+    <!-- ===========================
+         Settings Container
+         =========================== -->
     <div id="settings-container" style="display: none">
       <h2>Settings</h2>
       <div>
@@ -79,6 +94,10 @@
       </div>
     </div>
 
+    <!-- ===========================
+         Modal for Logout Confirmation
+         =========================== -->
+
     <div id="confirm-modal" class="modal">
       <div class="modal-content">
         <h2 id="confirm-message">
@@ -87,6 +106,20 @@
         <button id="confirm-yes">Yes</button>
         <button id="confirm-no">No</button>
         <button id="confirm-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ===========================
+     Flashcard Container
+     =========================== -->
+    <div id="flashcard-container" style="display: none">
+      <div id="flashcard">
+        <div id="question-text">What is the capital of France?</div>
+        <div class="flashcard-btns">
+          <button id="close-flashcard">Close</button>
+          <button id="skip-flashcard">Skip</button>
+          <button id="flip-flashcard">Flip</button>
+        </div>
       </div>
     </div>
 
