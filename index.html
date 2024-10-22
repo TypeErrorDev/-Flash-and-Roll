@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Flashcard App</title>
+  </head>
+  <body>
+    <nav class="navbar" id="navbar">
+      <div class="navbar-brand">Flashcard App</div>
+      <div id="theme-icon" style="cursor: pointer">
+        <svg
+          id="sun-icon"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="12" cy="12" r="5" fill="#333" />
+          <path d="M12 1V3" stroke="#333" stroke-width="2" />
+          <path d="M12 21V23" stroke="#333" stroke-width="2" />
+          <path d="M4.22 4.22L5.64 5.64" stroke="#333" stroke-width="2" />
+          <path d="M18.36 18.36L19.78 19.78" stroke="#333" stroke-width="2" />
+          <path d="M1 12H3" stroke="#333" stroke-width="2" />
+          <path d="M21 12H23" stroke="#333" stroke-width="2" />
+          <path d="M4.22 19.78L5.64 18.36" stroke="#333" stroke-width="2" />
+          <path d="M18.36 5.64L19.78 4.22" stroke="#333" stroke-width="2" />
+        </svg>
+        <svg
+          id="moon-icon"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M21.53 15.93c-.16-.27-.61-.69-1.73-.49a8.46 8.46 0 01-1.88.13 8.409 8.409 0 01-5.91-2.82 8.068 8.068 0 01-1.44-8.66c.44-1.01.13-1.54-.09-1.76s-.77-.55-1.83-.11a10.318 10.318 0 00-6.32 10.21 10.475 10.475 0 007.04 8.99 10 10 0 002.89.55c.16.01.32.02.48.02a10.5 10.5 0 008.47-4.27c.67-.93.49-1.519.32-1.79z"
+            fill="#fff"
+          />
+        </svg>
+      </div>
+    </nav>
+    <div id="auth-container">
+      <form id="auth-form">
+        <input
+          type="text"
+          id="display-name"
+          placeholder="Enter your name"
+          required
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+
+    <div id="settings-container" style="display: none">
+      <h2>Settings</h2>
+      <div>
+        <label for="theme-toggle">Theme: Light/Dark</label>
+        <input type="checkbox" id="theme-toggle" />
+      </div>
+      <div>
+        <label>Edit Decks:</label>
+        <button id="edit-decks">Enter Edit Mode</button>
+      </div>
+      <div>
+        <label>Reset Decks:</label>
+        <button id="reset-decks">Remove All Decks</button>
+      </div>
+      <div>
+        <button id="go-home-link">Go Back Home</button>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
