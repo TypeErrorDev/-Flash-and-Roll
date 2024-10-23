@@ -53,8 +53,8 @@
     </nav>
 
     <!-- ===========================
-    Authentication Container
-    =========================== -->
+        Authentication Container
+        =========================== -->
     <div id="auth-container">
       <form id="auth-form">
         <input
@@ -70,7 +70,16 @@
     <!-- ===========================
          Decks Container
          =========================== -->
-    <div id="decks-container"></div>
+    <div id="decks-container">
+      <h2>Your Decks</h2>
+      <button id="add-deck-button">Add Deck</button>
+      <div id="deck-input" style="display: none">
+        <input type="text" id="new-deck-name" placeholder="Deck Name" />
+        <button id="save-deck-button">Save Deck</button>
+        <button id="cancel-deck-button">Cancel</button>
+      </div>
+      <div id="deck-list"></div>
+    </div>
 
     <!-- ===========================
          Settings Container

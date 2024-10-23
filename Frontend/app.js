@@ -10,6 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("theme-toggle");
   const themeIcon = document.getElementById("theme-icon");
   const confirmModal = document.getElementById("confirm-modal");
+  const addDeckButton = document.getElementById("add-deck-button");
+  const saveDeckButton = document.getElementById("save-deck-button");
+  const cancelDeckButton = document.getElementById("cancel-deck-button");
+  const deckInput = document.getElementById("deck-input");
+  const newDeckNameInput = document.getElementById("new-deck-name");
 
   // ===========================
   // Authentication Check
@@ -37,9 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const menu = document.createElement("ul");
       menu.className = "navbar-menu";
       menu.innerHTML = `
-              <li id="settings-link">Settings</li>
-              <li id="sign-out-link">Sign Out</li>
-            `;
+            <li id="settings-link">Settings</li>
+            <li id="sign-out-link">Sign Out</li>
+          `;
       const existingMenu = navbar.querySelector(".navbar-menu");
       if (existingMenu) existingMenu.remove();
 
@@ -59,7 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
           settingsContainer.style.display = "block";
           flashcardContainer.style.display = "none";
           decksContainer.style.display = "none";
-          addSettingsEventListeners();
         }
       });
 
@@ -80,48 +84,93 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render Decks Function
   // ===========================
   const renderDecks = () => {
-    const decksContainer = document.getElementById("decks-container");
+    const decksContainer = document.getElementById("deck-list");
     decksContainer.innerHTML = "";
 
     const decks = JSON.parse(localStorage.getItem("decks")) || [];
     const table = document.createElement("table");
     table.innerHTML = `
-          <thead>
+        <thead>
+          <tr>
+            <th>Deck Name</th>
+            <th>Card Counts</th>
+            <th>Category</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${decks
+            .map(
+              (deck) => `
             <tr>
-              <th>Deck Name</th>
-              <th>Card Counts</th>
-              <th>Category</th>
+              <td class="deck-link" data-deck="${deck.name}">${deck.name}</td>
+              <td>${deck.cardCount}</td>
+              <td>${deck.category}</td>
+              <td>
+                <button class="delete-deck" data-deck="${deck.name}">Delete</button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            ${decks
-              .map(
-                (deck) => `
-              <tr>
-                <td><a href="#" class="deck-link" data-deck="${deck.name}">${deck.name}</a></td>
-                <td>${deck.cardCount}</td>
-                <td>${deck.category}</td>
-              </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        `;
+          `
+            )
+            .join("")}
+        </tbody>
+      `;
 
     decksContainer.appendChild(table);
 
     document.querySelectorAll(".deck-link").forEach((link) => {
       link.addEventListener("click", (e) => {
-        e.preventDefault();
         const deckName = e.target.dataset.deck;
         openFlashcards(deckName);
+      });
+    });
+
+    document.querySelectorAll(".delete-deck").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        const deckName = e.target.dataset.deck;
+        deleteDeck(deckName);
       });
     });
   };
 
   // ===========================
+  // Deck Management Functions
+  // ===========================
+  const showDeckInput = () => {
+    deckInput.style.display = "flex";
+    newDeckNameInput.value = "";
+  };
+
+  const hideDeckInput = () => {
+    deckInput.style.display = "none";
+  };
+
+  const saveDeck = () => {
+    const newDeckName = newDeckNameInput.value.trim();
+    if (newDeckName) {
+      const decks = JSON.parse(localStorage.getItem("decks")) || [];
+      decks.push({ name: newDeckName, cardCount: 0, category: "General" });
+      localStorage.setItem("decks", JSON.stringify(decks));
+      renderDecks();
+      hideDeckInput();
+    }
+  };
+
+  const deleteDeck = (deckName) => {
+    const decks = JSON.parse(localStorage.getItem("decks")) || [];
+    const updatedDecks = decks.filter((deck) => deck.name !== deckName);
+    localStorage.setItem("decks", JSON.stringify(updatedDecks));
+    renderDecks();
+  };
+  addDeckButton.addEventListener("click", showDeckInput);
+  saveDeckButton.addEventListener("click", saveDeck);
+  cancelDeckButton.addEventListener("click", hideDeckInput);
+
+  // ===========================
   // Open Flashcards Function
   // ===========================
+
+  // TODO: I need to remove this and utilize the database to update the flashcard container
   const openFlashcards = (deckName) => {
     const decksContainer = document.getElementById("decks-container");
     const flashcardContainer = document.getElementById("flashcard-container");
@@ -147,6 +196,29 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // ===========================
+  // Navbar Event Listeners
+  // ===========================
+  const addNavbarEventListeners = () => {
+    const menu = navbar.querySelector(".navbar-menu");
+    if (menu) {
+      menu.addEventListener("click", (e) => {
+        if (e.target.id === "sign-out-link") {
+          confirmModal.style.display = "flex";
+          document.body.classList.add("blur");
+          authContainer.style.display = "none";
+          settingsContainer.style.display = "none";
+          decksContainer.style.display = "none";
+          flashcardContainer.style.display = "none";
+        } else if (e.target.closest("#settings-link")) {
+          settingsContainer.style.display = "block";
+          flashcardContainer.style.display = "none";
+          decksContainer.style.display = "none";
+        }
+      });
+    }
+  };
+
+  // ===========================
   // Settings Event Listeners
   // ===========================
   const addSettingsEventListeners = () => {
@@ -155,7 +227,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (goHomeLink) {
         goHomeLink.addEventListener("click", () => {
           settingsContainer.style.display = "none";
-          const decksContainer = document.getElementById("decks-container");
           decksContainer.style.display = "block";
         });
       }
