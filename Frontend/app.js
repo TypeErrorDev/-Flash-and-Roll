@@ -24,21 +24,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Authentication Check
   // ===========================
   const checkAuth = () => {
+    console.log("Checking authentication...");
     const user = JSON.parse(localStorage.getItem("user"));
     const decksContainer = document.getElementById("decks-container");
     const flashcardContainer = document.getElementById("flashcard-container");
 
     if (user) {
+      console.log("User authenticated:", user.displayName);
       document.getElementById("user-name").textContent = user.displayName;
 
-      if (!localStorage.getItem("decks")) {
-        const defaultDeck = {
-          name: "Tutorial Deck",
-          cardCount: 5,
-          category: "General",
-        };
-        localStorage.setItem("decks", JSON.stringify([defaultDeck]));
-      }
+      // Load decks from localStorage
+      loadDecksFromLocalStorage();
 
       renderDecks();
       decksContainer.style.display = "block";
@@ -74,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       decksContainer.style.display = "block";
       flashcardContainer.style.display = "none";
     } else {
+      console.log("No user authenticated");
       const menu = navbar.querySelector(".navbar-menu");
       if (menu) menu.remove();
 
@@ -90,7 +87,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let decks = [];
 
   function loadDecksFromLocalStorage() {
-    decks = JSON.parse(localStorage.getItem("decks")) || [];
+    console.log("Loading decks from localStorage...");
+    const storedDecks = localStorage.getItem("decks");
+    if (storedDecks) {
+      decks = JSON.parse(storedDecks);
+      console.log("Loaded decks:", decks);
+    } else {
+      decks = [];
+      console.log("No decks found in localStorage");
+    }
   }
 
   function renderDecks() {
@@ -303,6 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function saveDeckToLocalStorage() {
+    console.log("Saving decks to localStorage:", decks);
     localStorage.setItem("decks", JSON.stringify(decks));
   }
 
@@ -435,15 +441,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Confirm Modal Actions
   // ===========================
   document.getElementById("confirm-yes").addEventListener("click", () => {
+    console.log("Clearing all data...");
     localStorage.clear();
     confirmModal.style.display = "none";
     alert("Local storage cleared. You have been signed out.");
     const flashcardContainer = document.getElementById("flashcard-container");
     flashcardContainer.style.display = "none";
+    decks = []; // Reset the decks array in memory
     checkAuth();
   });
 
   document.getElementById("confirm-no").addEventListener("click", () => {
+    console.log("Signing out without clearing data...");
     confirmModal.style.display = "none";
     alert("You have been signed out. Your data remains.");
     localStorage.removeItem("user");
