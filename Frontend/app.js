@@ -23,11 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // Authentication Check
   // ===========================
+  let decksContainer;
+
   const checkAuth = () => {
     console.log("Checking authentication...");
     const user = JSON.parse(localStorage.getItem("user"));
-    const decksContainer = document.getElementById("decks-container");
+    decksContainer = document.getElementById("decks-container");
     const flashcardContainer = document.getElementById("flashcard-container");
+    const settingsContainer = document.getElementById("settings-container");
 
     if (user) {
       console.log("User authenticated:", user.displayName);
@@ -63,7 +66,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (e.target.id === "settings-link") {
           settingsContainer.style.display = "block";
           flashcardContainer.style.display = "none";
-          decksContainer.style.display = "none";
+          if (decksContainer) {
+            decksContainer.style.display = "none";
+          }
         }
       });
 
@@ -373,12 +378,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Settings Event Listeners
   // ===========================
   const addSettingsEventListeners = () => {
+    const settingsContainer = document.getElementById("settings-container");
+    decksContainer = document.getElementById("decks-container"); // Define decksContainer here
+
     if (settingsContainer) {
       const goHomeLink = document.getElementById("go-home-link");
       if (goHomeLink) {
         goHomeLink.addEventListener("click", () => {
+          console.log("Go Home clicked");
           settingsContainer.style.display = "none";
-          decksContainer.style.display = "block";
+          if (decksContainer) {
+            decksContainer.style.display = "block";
+          } else {
+            console.error("decksContainer not found");
+          }
         });
       }
 
@@ -472,6 +485,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadDecksFromLocalStorage();
   renderDecks();
   checkAuth();
+
+  // Make sure to call this function after the DOM is loaded
+  addSettingsEventListeners();
 });
 
 function editDeck(deckName) {
