@@ -15,6 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelDeckButton = document.getElementById("cancel-deck-button");
   const deckInput = document.getElementById("deck-input");
   const newDeckNameInput = document.getElementById("new-deck-name");
+  const flashcardQuestion = document.getElementById("flashcard-question");
+  const flashcardAnswer = document.getElementById("flashcard-answer");
+  const addFlashcardButton = document.getElementById("add-flashcard-button");
+  const flashcardList = document.getElementById("flashcard-list");
 
   // ===========================
   // Authentication Check
@@ -83,17 +87,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // Render Decks Function
   // ===========================
-  const renderDecks = () => {
+  let decks = [];
+
+  function loadDecksFromLocalStorage() {
+    decks = JSON.parse(localStorage.getItem("decks")) || [];
+  }
+
+  function renderDecks() {
     const decksContainer = document.getElementById("deck-list");
     decksContainer.innerHTML = "";
 
-    const decks = JSON.parse(localStorage.getItem("decks")) || [];
     const table = document.createElement("table");
     table.innerHTML = `
         <thead>
           <tr>
             <th>Deck Name</th>
-            <th>Card Counts</th>
+            <th>Card Count</th>
             <th>Category</th>
             <th>Actions</th>
           </tr>
@@ -105,9 +114,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <tr>
               <td class="deck-link" data-deck="${deck.name}">${deck.name}</td>
               <td>${deck.cardCount}</td>
-              <td>${deck.category}</td>
+              <td>${deck.category || "General"}</td>
               <td>
-                <button class="delete-deck" data-deck="${deck.name}">Delete</button>
+                <button class="edit-deck" data-deck="${deck.name}">Edit</button>
+                <button class="delete-deck" data-deck="${
+                  deck.name
+                }">Delete</button>
               </td>
             </tr>
           `
@@ -118,6 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     decksContainer.appendChild(table);
 
+    // Add event listeners for deck links
     document.querySelectorAll(".deck-link").forEach((link) => {
       link.addEventListener("click", (e) => {
         const deckName = e.target.dataset.deck;
@@ -125,13 +138,22 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    // Add event listeners for delete buttons
     document.querySelectorAll(".delete-deck").forEach((button) => {
       button.addEventListener("click", (e) => {
         const deckName = e.target.dataset.deck;
         deleteDeck(deckName);
       });
     });
-  };
+
+    // Add event listeners for edit buttons
+    document.querySelectorAll(".edit-deck").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        const deckName = e.target.dataset.deck;
+        editDeck(deckName);
+      });
+    });
+  }
 
   // ===========================
   // Deck Management Functions
@@ -146,25 +168,143 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const saveDeck = () => {
-    const newDeckName = newDeckNameInput.value.trim();
-    if (newDeckName) {
-      const decks = JSON.parse(localStorage.getItem("decks")) || [];
-      decks.push({ name: newDeckName, cardCount: 0, category: "General" });
-      localStorage.setItem("decks", JSON.stringify(decks));
+    const deckName = newDeckNameInput.value.trim();
+    if (deckName && currentDeckFlashcards.length > 0) {
+      const existingDeckIndex = decks.findIndex((d) => d.name === deckName);
+      const newDeck = {
+        name: deckName,
+        flashcards: currentDeckFlashcards,
+        cardCount: currentDeckFlashcards.length,
+        category: "General", // You can add a category input if needed
+      };
+
+      if (existingDeckIndex !== -1) {
+        // Update existing deck
+        decks[existingDeckIndex] = newDeck;
+      } else {
+        // Add new deck
+        decks.push(newDeck);
+      }
+
+      saveDeckToLocalStorage();
       renderDecks();
-      hideDeckInput();
+      deckInput.style.display = "none";
+      newDeckNameInput.value = "";
+      currentDeckFlashcards = [];
+      updateFlashcardList();
     }
   };
 
   const deleteDeck = (deckName) => {
-    const decks = JSON.parse(localStorage.getItem("decks")) || [];
-    const updatedDecks = decks.filter((deck) => deck.name !== deckName);
-    localStorage.setItem("decks", JSON.stringify(updatedDecks));
+    decks = decks.filter((deck) => deck.name !== deckName);
+    saveDeckToLocalStorage();
     renderDecks();
   };
-  addDeckButton.addEventListener("click", showDeckInput);
-  saveDeckButton.addEventListener("click", saveDeck);
-  cancelDeckButton.addEventListener("click", hideDeckInput);
+
+  let currentDeckFlashcards = [];
+
+  addDeckButton.addEventListener("click", () => {
+    deckInput.style.display = "block";
+    currentDeckFlashcards = [];
+    updateFlashcardList();
+  });
+
+  addFlashcardButton.addEventListener("click", () => {
+    const question = flashcardQuestion.value.trim();
+    const answer = flashcardAnswer.value.trim();
+    if (question && answer) {
+      currentDeckFlashcards.push({ question, answer });
+      flashcardQuestion.value = "";
+      flashcardAnswer.value = "";
+      updateFlashcardList();
+    }
+  });
+
+  function updateFlashcardList() {
+    flashcardList.innerHTML = "";
+    currentDeckFlashcards.forEach((card, index) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${index + 1}. ${card.question}</span>
+        <button class="edit-flashcard" data-index="${index}">Edit</button>
+        <button class="delete-flashcard" data-index="${index}">Delete</button>
+      `;
+      flashcardList.appendChild(li);
+    });
+
+    // Add event listeners for edit and delete flashcard buttons
+    document.querySelectorAll(".edit-flashcard").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        const index = parseInt(e.target.dataset.index);
+        editFlashcard(index);
+      });
+    });
+
+    document.querySelectorAll(".delete-flashcard").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        const index = parseInt(e.target.dataset.index);
+        deleteFlashcard(index);
+      });
+    });
+  }
+
+  function editFlashcard(index) {
+    const card = currentDeckFlashcards[index];
+    flashcardQuestion.value = card.question;
+    flashcardAnswer.value = card.answer;
+    addFlashcardButton.textContent = "Update Flashcard";
+    addFlashcardButton.onclick = () => {
+      updateFlashcard(index);
+    };
+  }
+
+  function updateFlashcard(index) {
+    const question = flashcardQuestion.value.trim();
+    const answer = flashcardAnswer.value.trim();
+    if (question && answer) {
+      currentDeckFlashcards[index] = { question, answer };
+      flashcardQuestion.value = "";
+      flashcardAnswer.value = "";
+      updateFlashcardList();
+      addFlashcardButton.textContent = "Add Flashcard";
+      addFlashcardButton.onclick = addFlashcard;
+    }
+  }
+
+  function deleteFlashcard(index) {
+    currentDeckFlashcards.splice(index, 1);
+    updateFlashcardList();
+  }
+
+  saveDeckButton.addEventListener("click", () => {
+    const deckName = newDeckNameInput.value.trim();
+    if (deckName && currentDeckFlashcards.length > 0) {
+      const newDeck = {
+        name: deckName,
+        flashcards: currentDeckFlashcards,
+        cardCount: currentDeckFlashcards.length,
+        category: "General", // You can add a category input if needed
+      };
+      decks.push(newDeck);
+      saveDeckToLocalStorage();
+      renderDecks();
+      deckInput.style.display = "none";
+      newDeckNameInput.value = "";
+      currentDeckFlashcards = [];
+      updateFlashcardList();
+    }
+  });
+
+  cancelDeckButton.addEventListener("click", () => {
+    deckInput.style.display = "none";
+    newDeckNameInput.value = "";
+    currentDeckFlashcards = [];
+    updateFlashcardList();
+  });
+
+  function saveDeckToLocalStorage() {
+    localStorage.setItem("decks", JSON.stringify(decks));
+  }
 
   // ===========================
   // Open Flashcards Function
@@ -192,6 +332,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("flip-flashcard").onclick = () => {
       questionText.textContent = "The answer is Paris.";
+    };
+
+    // Add event listener for the new Next button
+    document.getElementById("next-flashcard").onclick = () => {
+      questionText.textContent = "Next question goes here.";
     };
   };
 
@@ -315,5 +460,46 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // Initial Check
   // ===========================
+  loadDecksFromLocalStorage();
+  renderDecks();
   checkAuth();
 });
+
+function editDeck(deckName) {
+  const deck = decks.find((d) => d.name === deckName);
+  if (!deck) return;
+
+  currentDeckFlashcards = [...deck.flashcards];
+  newDeckNameInput.value = deck.name;
+  deckInput.style.display = "block";
+  updateFlashcardList();
+
+  // Change the save button to update instead of create
+  saveDeckButton.textContent = "Update Deck";
+  saveDeckButton.onclick = () => updateDeck(deckName);
+}
+
+function updateDeck(oldDeckName) {
+  const newDeckName = newDeckNameInput.value.trim();
+  if (newDeckName && currentDeckFlashcards.length > 0) {
+    const deckIndex = decks.findIndex((d) => d.name === oldDeckName);
+    if (deckIndex !== -1) {
+      decks[deckIndex] = {
+        name: newDeckName,
+        flashcards: currentDeckFlashcards,
+        cardCount: currentDeckFlashcards.length,
+        category: decks[deckIndex].category,
+      };
+      saveDeckToLocalStorage();
+      renderDecks();
+      deckInput.style.display = "none";
+      newDeckNameInput.value = "";
+      currentDeckFlashcards = [];
+      updateFlashcardList();
+
+      // Reset the save button
+      saveDeckButton.textContent = "Save Deck";
+      saveDeckButton.onclick = saveDeck;
+    }
+  }
+}
