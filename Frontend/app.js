@@ -47,6 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const flashcardAnswer = document.getElementById("flashcard-answer");
   const addFlashcardButton = document.getElementById("add-flashcard-button");
   const flashcardList = document.getElementById("flashcard-list");
+  const deckCategoryInput = document.getElementById("deck-category");
+  const flashcardPointsSelect = document.getElementById("flashcard-points");
 
   // ===========================
   // Authentication Check
@@ -119,20 +121,27 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   let decks = [];
 
-  function loadDecksFromLocalStorage() {
-    console.log("Loading decks from localStorage...");
-    const storedDecks = localStorage.getItem("decks");
-    if (storedDecks) {
-      decks = JSON.parse(storedDecks);
-      console.log("Loaded decks:", decks);
+  const loadDecksFromLocalStorage = () => {
+    const savedDecks = localStorage.getItem("decks");
+    if (savedDecks) {
+      decks = JSON.parse(savedDecks);
+      console.log("Loaded decks:", decks); // Debug log
     } else {
       decks = [];
-      console.log("No decks found in localStorage");
     }
-  }
+  };
 
   const renderDecks = () => {
     const deckList = document.getElementById("deck-list");
+
+    console.log("Rendering decks:", decks); // Debug log
+
+    if (decks.length === 0) {
+      deckList.innerHTML =
+        "<p>No decks available. Create one to get started!</p>";
+      return;
+    }
+
     deckList.innerHTML = `
       <table>
         <thead>
@@ -146,20 +155,27 @@ document.addEventListener("DOMContentLoaded", () => {
         </thead>
         <tbody>
           ${decks
-            .map(
-              (deck, index) => `
-            <tr>
-              <td><a href="#" class="deck-link" data-deck="${deck.name}">${deck.name}</a></td>
-              <td>${deck.category}</td>
-              <td>${deck.cardCount}</td>
-              <td>${deck.totalPoints}</td>
-              <td>
-                <button class="edit-btn" data-deck="${deck.name}">Edit</button>
-                <button class="delete-btn" data-deck="${deck.name}">Delete</button>
-              </td>
-            </tr>
-          `
-            )
+            .map((deck) => {
+              console.log(
+                "Rendering deck:",
+                deck.name,
+                "Category:",
+                deck.category
+              );
+
+              return `
+                  <tr>
+                    <td><a href="#" class="deck-link" data-deck="${deck.name}">${deck.name}</a></td>
+                    <td>${deck.category}</td>
+                    <td>${deck.cardCount} cards</td>
+                    <td>${deck.totalPoints} points</td>
+                    <td>
+                      <button class="edit-btn" data-deck="${deck.name}">Edit</button>
+                      <button class="delete-btn" data-deck="${deck.name}">Delete</button>
+                    </td>
+                  </tr>
+                `;
+            })
             .join("")}
         </tbody>
       </table>
@@ -214,22 +230,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const saveDeck = () => {
     const deckName = newDeckNameInput.value.trim();
-    const category = document.getElementById("deck-category").value.trim();
+    const categoryInput = document.getElementById("deck-category");
+    const category = categoryInput ? categoryInput.value.trim() : "";
+
+    console.log("Category input element:", categoryInput);
+    console.log("Category value:", category);
 
     if (deckName && currentDeckFlashcards.length > 0 && category) {
-      const totalPoints = currentDeckFlashcards.reduce(
-        (sum, card) => sum + card.points,
-        0
-      );
+      // Calculate total points
+      const totalPoints = currentDeckFlashcards.reduce((sum, card) => {
+        return sum + Number(card.points);
+      }, 0);
 
-      decks.push({
+      const newDeck = {
         name: deckName,
-        category: category,
+        category: category, // Using the category from input
         flashcards: currentDeckFlashcards,
         cardCount: currentDeckFlashcards.length,
         totalPoints: totalPoints,
-      });
+      };
 
+      console.log("New deck being saved:", newDeck); // Debug log
+
+      decks.push(newDeck);
       saveDeckToLocalStorage();
       renderDecks();
 
@@ -237,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
       deckInput.style.display = "none";
       addDeckButton.style.display = "block";
       newDeckNameInput.value = "";
-      document.getElementById("deck-category").value = "";
+      categoryInput.value = "";
       currentDeckFlashcards = [];
       updateFlashcardList();
     } else {
@@ -276,22 +299,23 @@ document.addEventListener("DOMContentLoaded", () => {
   addFlashcardButton.addEventListener("click", () => {
     const question = flashcardQuestion.value.trim();
     const answer = flashcardAnswer.value.trim();
-    const points = parseInt(document.getElementById("flashcard-points").value);
+    const points = Number(document.getElementById("flashcard-points").value);
 
     if (question && answer) {
+      console.log("Adding flashcard with points:", points); // Debug log
+
       currentDeckFlashcards.push({
         question,
         answer,
         points,
       });
 
-      // Update the flashcard list display
-      updateFlashcardList();
+      console.log("Current flashcards:", currentDeckFlashcards); // Debug log
 
-      // Clear inputs
+      updateFlashcardList();
       flashcardQuestion.value = "";
       flashcardAnswer.value = "";
-      document.getElementById("flashcard-points").value = "1"; // Reset to default
+      document.getElementById("flashcard-points").value = "1";
     }
   });
 
@@ -360,13 +384,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   saveDeckButton.addEventListener("click", () => {
     const deckName = newDeckNameInput.value.trim();
+    const category = document.getElementById("deck-category").value.trim();
+
     if (deckName && currentDeckFlashcards.length > 0) {
+      // Calculate total points
+      const totalPoints = currentDeckFlashcards.reduce((sum, card) => {
+        return sum + Number(card.points);
+      }, 0);
+
       const existingDeckIndex = decks.findIndex((d) => d.name === deckName);
       const newDeck = {
         name: deckName,
         flashcards: currentDeckFlashcards,
         cardCount: currentDeckFlashcards.length,
-        category: "General",
+        category: category || "Uncategorized", // Use user input or fallback if empty
+        totalPoints: totalPoints,
       };
 
       if (existingDeckIndex !== -1) {
@@ -382,11 +414,14 @@ document.addEventListener("DOMContentLoaded", () => {
       deckInput.style.display = "none";
       addDeckButton.style.display = "block";
       newDeckNameInput.value = "";
+      document.getElementById("deck-category").value = ""; // Clear category input
       currentDeckFlashcards = [];
       updateFlashcardList();
 
       // Reset the save button text if it was changed
       saveDeckButton.textContent = "Save Deck";
+    } else {
+      alert("Please enter a deck name and add at least one flashcard.");
     }
   });
 
@@ -399,7 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function saveDeckToLocalStorage() {
-    console.log("Saving decks to localStorage:", decks);
+    console.log("Saving to localStorage:", decks); // Debug log
     localStorage.setItem("decks", JSON.stringify(decks));
   }
 
@@ -612,6 +647,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     currentDeckFlashcards = [...deck.flashcards];
     newDeckNameInput.value = deck.name;
+    document.getElementById("deck-category").value = deck.category; // Set the existing category
+
     deckInput.style.display = "block";
     addDeckButton.style.display = "none";
     updateFlashcardList();
@@ -622,20 +659,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveDeckButton.onclick = () => {
       const newDeckName = newDeckNameInput.value.trim();
+      const newCategory =
+        document.getElementById("deck-category").value.trim() || deck.category; // Use new category or keep existing
+
       if (newDeckName && currentDeckFlashcards.length > 0) {
         const deckIndex = decks.findIndex((d) => d.name === deckName);
         if (deckIndex !== -1) {
+          // Calculate total points
+          const totalPoints = currentDeckFlashcards.reduce(
+            (sum, card) => sum + parseInt(card.points),
+            0
+          );
+
           decks[deckIndex] = {
             name: newDeckName,
             flashcards: currentDeckFlashcards,
             cardCount: currentDeckFlashcards.length,
-            category: decks[deckIndex].category,
+            category: newCategory,
+            totalPoints: totalPoints,
           };
+
           saveDeckToLocalStorage();
           renderDecks();
           deckInput.style.display = "none";
           addDeckButton.style.display = "block";
           newDeckNameInput.value = "";
+          document.getElementById("deck-category").value = "";
           currentDeckFlashcards = [];
           updateFlashcardList();
 
