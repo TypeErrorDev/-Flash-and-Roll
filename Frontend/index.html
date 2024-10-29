@@ -75,9 +75,20 @@
       <button id="add-deck-button">Add Deck</button>
       <div id="deck-input" style="display: none">
         <input type="text" id="new-deck-name" placeholder="Deck Name" />
+        <input
+          type="text"
+          id="deck-category"
+          placeholder="Enter Category (e.g., Math, Science, History)"
+        />
         <div id="flashcard-form">
           <input type="text" id="flashcard-question" placeholder="Question" />
           <input type="text" id="flashcard-answer" placeholder="Answer" />
+          <select id="flashcard-points">
+            <option value="1">Easy (1 point)</option>
+            <option value="2">Medium (2 points)</option>
+            <option value="3">Hard (3 points)</option>
+            <option value="5">Expert (5 points)</option>
+          </select>
           <button id="add-flashcard-button">Add Flashcard</button>
         </div>
         <div id="flashcard-list-container">

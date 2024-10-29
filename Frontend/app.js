@@ -131,77 +131,74 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function renderDecks() {
-    const decksContainer = document.getElementById("deck-list");
-    decksContainer.innerHTML = "";
-
-    const table = document.createElement("table");
-    table.innerHTML = `
+  const renderDecks = () => {
+    const deckList = document.getElementById("deck-list");
+    deckList.innerHTML = `
+      <table>
         <thead>
           <tr>
             <th>Deck Name</th>
-            <th>Card Count</th>
             <th>Category</th>
+            <th>Cards</th>
+            <th>Total Points</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           ${decks
             .map(
-              (deck) => `
+              (deck, index) => `
             <tr>
-              <td class="deck-link" data-deck="${deck.name}">${deck.name}</td>
+              <td><a href="#" class="deck-link" data-deck="${deck.name}">${deck.name}</a></td>
+              <td>${deck.category}</td>
               <td>${deck.cardCount}</td>
-              <td>${deck.category || "General"}</td>
+              <td>${deck.totalPoints}</td>
               <td>
-                <button class="edit-deck" data-deck="${deck.name}">Edit</button>
-                <button class="delete-deck" data-deck="${
-                  deck.name
-                }">Delete</button>
+                <button class="edit-btn" data-deck="${deck.name}">Edit</button>
+                <button class="delete-btn" data-deck="${deck.name}">Delete</button>
               </td>
             </tr>
           `
             )
             .join("")}
         </tbody>
-      `;
+      </table>
+    `;
 
-    decksContainer.appendChild(table);
+    // Add event listeners after rendering
+    const deleteButtons = deckList.querySelectorAll(".delete-btn");
+    const editButtons = deckList.querySelectorAll(".edit-btn");
+    const deckLinks = deckList.querySelectorAll(".deck-link");
 
-    // Add event listeners for edit buttons
-    document.querySelectorAll(".edit-deck").forEach((button) => {
-      button.addEventListener("click", (e) => {
-        console.log("Edit button clicked");
-        const deckName = e.target.dataset.deck;
-        console.log("Editing deck:", deckName);
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const deckName = button.getAttribute("data-deck");
+        if (confirm(`Are you sure you want to delete "${deckName}"?`)) {
+          const deckIndex = decks.findIndex((deck) => deck.name === deckName);
+          if (deckIndex !== -1) {
+            decks.splice(deckIndex, 1);
+            saveDeckToLocalStorage();
+            renderDecks();
+          }
+        }
+      });
+    });
+
+    editButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const deckName = button.getAttribute("data-deck");
         editDeck(deckName);
       });
     });
 
-    // Add event listeners for deck links
-    document.querySelectorAll(".deck-link").forEach((link) => {
+    deckLinks.forEach((link) => {
       link.addEventListener("click", (e) => {
-        const deckName = e.target.dataset.deck;
-        openFlashcards(deckName);
+        e.preventDefault();
+        const deckName = link.getAttribute("data-deck");
+        startDeck(deckName);
       });
     });
-
-    // Add event listeners for delete buttons
-    document.querySelectorAll(".delete-deck").forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const deckName = e.target.dataset.deck;
-        deleteDeck(deckName);
-      });
-    });
-
-    // Add event listeners for edit buttons
-    document.querySelectorAll(".edit-deck").forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const deckName = e.target.dataset.deck;
-        editDeck(deckName);
-      });
-    });
-  }
+  };
 
   // ===========================
   // Deck Management Functions
@@ -217,36 +214,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const saveDeck = () => {
     const deckName = newDeckNameInput.value.trim();
-    if (deckName && currentDeckFlashcards.length > 0) {
-      const existingDeckIndex = decks.findIndex((d) => d.name === deckName);
-      const newDeck = {
+    const category = document.getElementById("deck-category").value.trim();
+
+    if (deckName && currentDeckFlashcards.length > 0 && category) {
+      const totalPoints = currentDeckFlashcards.reduce(
+        (sum, card) => sum + card.points,
+        0
+      );
+
+      decks.push({
         name: deckName,
+        category: category,
         flashcards: currentDeckFlashcards,
         cardCount: currentDeckFlashcards.length,
-        category: "General", // You can add a category input if needed
-      };
-
-      if (existingDeckIndex !== -1) {
-        // Update existing deck
-        decks[existingDeckIndex] = newDeck;
-      } else {
-        // Add new deck
-        decks.push(newDeck);
-      }
+        totalPoints: totalPoints,
+      });
 
       saveDeckToLocalStorage();
       renderDecks();
+
+      // Reset form
       deckInput.style.display = "none";
+      addDeckButton.style.display = "block";
       newDeckNameInput.value = "";
+      document.getElementById("deck-category").value = "";
       currentDeckFlashcards = [];
       updateFlashcardList();
+    } else {
+      alert("Please enter a deck name, category, and at least one flashcard.");
     }
   };
 
   const deleteDeck = (deckName) => {
-    decks = decks.filter((deck) => deck.name !== deckName);
-    saveDeckToLocalStorage();
-    renderDecks();
+    // Find the deck index
+    const deckIndex = decks.findIndex((deck) => deck.name === deckName);
+
+    if (deckIndex !== -1) {
+      // Show confirmation dialog
+      if (confirm(`Are you sure you want to delete "${deckName}"?`)) {
+        // Remove the deck from the array
+        decks.splice(deckIndex, 1);
+
+        // Save updated decks to localStorage
+        saveDeckToLocalStorage();
+
+        // Re-render the deck list
+        renderDecks();
+      }
+    }
   };
 
   let currentDeckFlashcards = [];
@@ -261,40 +276,40 @@ document.addEventListener("DOMContentLoaded", () => {
   addFlashcardButton.addEventListener("click", () => {
     const question = flashcardQuestion.value.trim();
     const answer = flashcardAnswer.value.trim();
+    const points = parseInt(document.getElementById("flashcard-points").value);
+
     if (question && answer) {
-      currentDeckFlashcards.push({ question, answer });
+      currentDeckFlashcards.push({
+        question,
+        answer,
+        points,
+      });
+
+      // Update the flashcard list display
+      updateFlashcardList();
+
+      // Clear inputs
       flashcardQuestion.value = "";
       flashcardAnswer.value = "";
-      updateFlashcardList();
+      document.getElementById("flashcard-points").value = "1"; // Reset to default
     }
   });
 
   function updateFlashcardList() {
-    flashcardList.innerHTML = "";
-    currentDeckFlashcards.forEach((card, index) => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <span>${index + 1}. ${card.question}</span>
-        <button class="edit-flashcard" data-index="${index}">Edit</button>
-        <button class="delete-flashcard" data-index="${index}">Delete</button>
-      `;
-      flashcardList.appendChild(li);
-    });
-
-    // Add event listeners for edit and delete flashcard buttons
-    document.querySelectorAll(".edit-flashcard").forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const index = parseInt(e.target.dataset.index);
-        editFlashcard(index);
-      });
-    });
-
-    document.querySelectorAll(".delete-flashcard").forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const index = parseInt(e.target.dataset.index);
-        deleteFlashcard(index);
-      });
-    });
+    flashcardList.innerHTML = currentDeckFlashcards
+      .map(
+        (card, index) => `
+      <li>
+        <div class="flashcard-info">
+          <strong>Q: ${card.question}</strong><br>
+          A: ${card.answer}<br>
+          Points: ${card.points}
+        </div>
+        <button onclick="removeFlashcard(${index})">Remove</button>
+      </li>
+    `
+      )
+      .join("");
   }
 
   function editFlashcard(index) {

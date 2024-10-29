@@ -390,3 +390,49 @@ body[data-theme="dark"] #leaderboard-table {
 body[data-theme="dark"] #leaderboard-table td {
   border-bottom: 1px solid #555;
 }
+
+#deck-input select {
+  padding: 8px;
+  margin: 10px 0;
+  width: 200px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#flashcard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+#flashcard-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme support */
+body[data-theme="dark"] #flashcard-list li {
+  background-color: #444;
+}
+
+#deck-input input[type="text"] {
+  padding: 8px;
+  margin: 10px 0;
+  width: 200px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Dark theme support */
+body[data-theme="dark"] #deck-input input[type="text"] {
+  background-color: #444;
+  color: #fff;
+  border-color: #555;
+}
