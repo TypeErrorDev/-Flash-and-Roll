@@ -1,3 +1,31 @@
+function testBackendConnection() {
+  fetch("http://localhost:3000/api/test")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Response from backend:", data);
+      alert(data.message);
+    })
+    .catch((err) => {
+      console.error("Error testing backend connection:", err);
+      alert(
+        "Failed to connect to backend. Please ensure the backend server is running."
+      );
+    });
+}
+
+function testDatabaseConnection() {
+  fetch("http://localhost:3000/api/test-db")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Database response:", data);
+      alert(data.message);
+    })
+    .catch((err) => {
+      console.error("Error testing database:", err);
+      alert("Failed to connect to database");
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // DOM Elements Selection
@@ -300,13 +328,22 @@ document.addEventListener("DOMContentLoaded", () => {
   saveDeckButton.addEventListener("click", () => {
     const deckName = newDeckNameInput.value.trim();
     if (deckName && currentDeckFlashcards.length > 0) {
+      const existingDeckIndex = decks.findIndex((d) => d.name === deckName);
       const newDeck = {
         name: deckName,
         flashcards: currentDeckFlashcards,
         cardCount: currentDeckFlashcards.length,
         category: "General",
       };
-      decks.push(newDeck);
+
+      if (existingDeckIndex !== -1) {
+        // Update existing deck
+        decks[existingDeckIndex] = newDeck;
+      } else {
+        // Add new deck
+        decks.push(newDeck);
+      }
+
       saveDeckToLocalStorage();
       renderDecks();
       deckInput.style.display = "none";
@@ -314,6 +351,9 @@ document.addEventListener("DOMContentLoaded", () => {
       newDeckNameInput.value = "";
       currentDeckFlashcards = [];
       updateFlashcardList();
+
+      // Reset the save button text if it was changed
+      saveDeckButton.textContent = "Save Deck";
     }
   });
 
@@ -531,43 +571,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Make sure to call this function after the DOM is loaded
   addSettingsEventListeners();
-});
 
-function editDeck(deckName) {
-  const deck = decks.find((d) => d.name === deckName);
-  if (!deck) return;
+  // Move editDeck function inside the DOMContentLoaded scope
+  function editDeck(deckName) {
+    const deck = decks.find((d) => d.name === deckName);
+    if (!deck) return;
 
-  currentDeckFlashcards = [...deck.flashcards];
-  newDeckNameInput.value = deck.name;
-  deckInput.style.display = "block";
-  updateFlashcardList();
+    currentDeckFlashcards = [...deck.flashcards];
+    newDeckNameInput.value = deck.name;
+    deckInput.style.display = "block";
+    addDeckButton.style.display = "none";
+    updateFlashcardList();
 
-  // Change the save button to update instead of create
-  saveDeckButton.textContent = "Update Deck";
-  saveDeckButton.onclick = () => updateDeck(deckName);
-}
+    // Change the save button to update instead of create
+    saveDeckButton.textContent = "Update Deck";
+    const originalSaveFunction = saveDeckButton.onclick;
 
-function updateDeck(oldDeckName) {
-  const newDeckName = newDeckNameInput.value.trim();
-  if (newDeckName && currentDeckFlashcards.length > 0) {
-    const deckIndex = decks.findIndex((d) => d.name === oldDeckName);
-    if (deckIndex !== -1) {
-      decks[deckIndex] = {
-        name: newDeckName,
-        flashcards: currentDeckFlashcards,
-        cardCount: currentDeckFlashcards.length,
-        category: decks[deckIndex].category,
-      };
-      saveDeckToLocalStorage();
-      renderDecks();
-      deckInput.style.display = "none";
-      newDeckNameInput.value = "";
-      currentDeckFlashcards = [];
-      updateFlashcardList();
+    saveDeckButton.onclick = () => {
+      const newDeckName = newDeckNameInput.value.trim();
+      if (newDeckName && currentDeckFlashcards.length > 0) {
+        const deckIndex = decks.findIndex((d) => d.name === deckName);
+        if (deckIndex !== -1) {
+          decks[deckIndex] = {
+            name: newDeckName,
+            flashcards: currentDeckFlashcards,
+            cardCount: currentDeckFlashcards.length,
+            category: decks[deckIndex].category,
+          };
+          saveDeckToLocalStorage();
+          renderDecks();
+          deckInput.style.display = "none";
+          addDeckButton.style.display = "block";
+          newDeckNameInput.value = "";
+          currentDeckFlashcards = [];
+          updateFlashcardList();
 
-      // Reset the save button
-      saveDeckButton.textContent = "Save Deck";
-      saveDeckButton.onclick = saveDeck;
-    }
+          // Reset the save button
+          saveDeckButton.textContent = "Save Deck";
+          saveDeckButton.onclick = originalSaveFunction;
+        }
+      }
+    };
   }
-}
+}); // End of DOMContentLoaded
