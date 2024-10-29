@@ -295,7 +295,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function updateFlashcardList() {
+  // Add the removeFlashcard function
+  const removeFlashcard = (index) => {
+    currentDeckFlashcards.splice(index, 1);
+    updateFlashcardList();
+  };
+
+  // Update the updateFlashcardList function to use event listeners
+  const updateFlashcardList = () => {
     flashcardList.innerHTML = currentDeckFlashcards
       .map(
         (card, index) => `
@@ -305,12 +312,23 @@ document.addEventListener("DOMContentLoaded", () => {
           A: ${card.answer}<br>
           Points: ${card.points}
         </div>
-        <button onclick="removeFlashcard(${index})">Remove</button>
+        <button class="remove-flashcard-btn" data-index="${index}">Remove</button>
       </li>
     `
       )
       .join("");
-  }
+
+    // Add event listeners to remove buttons
+    const removeButtons = flashcardList.querySelectorAll(
+      ".remove-flashcard-btn"
+    );
+    removeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const index = parseInt(button.getAttribute("data-index"));
+        removeFlashcard(index);
+      });
+    });
+  };
 
   function editFlashcard(index) {
     const card = currentDeckFlashcards[index];
