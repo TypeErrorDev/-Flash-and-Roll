@@ -39,6 +39,8 @@ body {
   align-items: center;
   box-sizing: border-box;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .navbar-brand {
@@ -226,10 +228,33 @@ th {
    =========================== */
 #flashcard-container {
   width: 100%;
-  max-width: 1200px;
-  margin: 20px auto 40px auto;
+  margin: 20px 0;
   padding: 20px;
-  display: none;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+/* Add styles for the study session title */
+#flashcard-container h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+#flashcard {
+  width: 80%;
+  margin: 0 auto;
+  min-height: 200px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* ===========================
@@ -237,43 +262,133 @@ th {
    =========================== */
 #flashcard {
   width: 100%;
-  max-width: 500px;
-  height: 300px;
-  margin: 0 auto;
-  perspective: 1000px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 #question-text {
-  font-size: 20px;
-  text-align: center;
-  margin: 0;
-  flex-grow: 1;
-  color: black;
-}
-
-#button-container {
-  display: flex;
-  justify-content: space-between;
   width: 100%;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .flashcard-btns {
+  width: 100%;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.flashcard-btns button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  gap: 10px;
+  justify-content: center;
+  padding: 0;
 }
 
-button:hover {
-  background-color: #0056b3;
+.flashcard-btns button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+/* Close button */
+#close-flashcard {
+  background-color: #1976d2; /* Darker blue */
+}
+
+/* Flip button */
+#flip-flashcard {
+  background-color: #42a5f5; /* Lighter blue */
+}
+
+/* Next button */
+#next-flashcard {
+  background-color: #64b5f6; /* Even lighter blue */
+}
+
+/* Hover effects */
+.flashcard-btns button:hover {
+  filter: brightness(110%);
+  transform: translateY(-1px);
+}
+
+/* Active/Click effect */
+.flashcard-btns button:active {
+  transform: translateY(0);
+}
+
+/* Dark theme adjustments */
+body[data-theme="dark"] .flashcard-btns button {
+  opacity: 0.9;
+}
+
+body[data-theme="dark"] .flashcard-btns button:hover {
+  opacity: 1;
+}
+
+.btn-close {
+  background-color: #dc3545;
+}
+.btn-skip {
+  background-color: #ffc107;
+  color: black;
+}
+.btn-flip {
+  background-color: #17a2b8;
+}
+.btn-next {
+  background-color: #28a745;
+}
+
+/* Dark theme */
+body[data-theme="dark"] #flashcard-container {
+  background: #333;
+}
+
+body[data-theme="dark"] #flashcard {
+  background: #444;
+}
+
+body[data-theme="dark"] #question-text {
+  color: white;
+}
+
+body[data-theme="dark"] h2 {
+  color: white;
+}
+
+/* Animation for card flip */
+.flip {
+  animation: flipCard 0.6s ease-in-out;
+}
+
+@keyframes flipCard {
+  0% {
+    transform: rotateY(0);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .flashcard-btns {
+    flex-wrap: wrap;
+  }
+
+  .flashcard-btns button {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 120px;
+  }
 }
 
 /*  ===========================  
@@ -296,7 +411,7 @@ button:hover {
   }
 
   #flashcard-container {
-    width: 90%;
+    width: 70%;
     height: auto;
     margin: 100px auto;
   }
@@ -341,16 +456,16 @@ button:hover {
 .main-content {
   width: 100%;
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 0 auto;
   padding: 0 20px;
-  display: flex;
-  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .content-wrapper {
   display: flex;
   gap: 30px;
   justify-content: space-between;
+  margin-top: 20px;
 }
 
 #leaderboard-container {
@@ -713,47 +828,230 @@ body.active-flashcards .content-wrapper {
 .main-content {
   width: 100%;
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 0 auto;
   padding: 0 20px;
-  display: flex;
-  flex-direction: column;
+  box-sizing: border-box;
 }
 
 #flashcard-container {
   width: 100%;
-  margin-bottom: 30px; /* Space between flashcard and tables */
-  display: none; /* Hidden by default */
+  margin: 20px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.content-wrapper {
+#flashcard {
+  width: 97%;
+  margin: 0 auto;
+  min-height: 200px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+#question-text {
+  width: 100%;
+  min-height: 100px;
   display: flex;
-  gap: 30px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Dark theme adjustments */
+body[data-theme="dark"] #flashcard-container {
+  background: #333;
+}
+
+body[data-theme="dark"] #flashcard {
+  background: #444;
+}
+
+body[data-theme="dark"] #question-text {
+  color: white;
+}
+
+body[data-theme="dark"] h2 {
+  color: white;
+}
+
+/* Update the title styling */
+#flashcard-container h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+body[data-theme="dark"] #flashcard-container h2 {
+  color: white;
+}
+
+#answer-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+#user-answer {
+  width: 80%;
+  padding: 10px;
+  border: 2px solid #2196f3;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+#submit-answer {
+  background-color: #2196f3;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+#submit-answer:hover {
+  background-color: #1976d2;
+}
+
+#feedback-message {
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+}
+
+#feedback-message.correct {
+  background-color: #4caf50;
+  color: white;
+}
+
+#feedback-message.incorrect {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Dark theme adjustments */
+body[data-theme="dark"] #user-answer {
+  background-color: #444;
+  color: white;
+  border-color: #2196f3;
+}
+
+#user-answer,
+#submit-answer,
+#feedback-message {
+  transition: all 0.3s ease;
+}
+
+#feedback-message {
+  margin: 10px 0;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+  opacity: 0;
+}
+
+#feedback-message.correct,
+#feedback-message.incorrect {
+  opacity: 1;
+}
+
+.flashcard-item {
+  display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin: 5px 0;
+  background: #f8f9fa;
+  border-radius: 4px;
 }
 
-#leaderboard-container {
-  flex: 0 0 40%;
-  min-width: 300px;
+.flashcard-content {
+  flex-grow: 1;
 }
 
-#decks-container {
-  flex: 0 0 55%;
-  min-width: 400px;
+.flashcard-edit-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
 }
 
-/* Style for when flashcards are active */
-#flashcard-container.active {
-  display: block;
-  animation: slideDown 0.3s ease-out;
+.flashcard-edit-form input,
+.flashcard-edit-form select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.edit-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-buttons button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-edit {
+  background-color: #2196f3;
+  color: white;
+}
+
+.cancel-edit {
+  background-color: #666;
+  color: white;
+}
+
+/* Dark theme support */
+body[data-theme="dark"] .flashcard-item {
+  background: #444;
+}
+
+body[data-theme="dark"] .flashcard-edit-form input,
+body[data-theme="dark"] .flashcard-edit-form select {
+  background: #333;
+  color: white;
+  border-color: #555;
+}
+
+.flashcard-actions {
+  margin-top: 5px;
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn,
+.remove-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+}
+
+.edit-btn {
+  background-color: #2196f3;
+}
+
+.remove-btn {
+  background-color: #dc3545;
+}
+
+.edit-btn:hover,
+.remove-btn:hover {
+  filter: brightness(110%);
 }

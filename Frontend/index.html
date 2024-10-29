@@ -106,25 +106,28 @@
     <!-- ===========================
          Flashcard Container
          =========================== -->
-    <div id="flashcard-container" style="display: none">
-      <div id="flashcard">
-        <div id="question-text">What is the capital of France?</div>
-        <div class="flashcard-btns">
-          <button id="close-flashcard">Close</button>
-          <button id="skip-flashcard">Skip</button>
-          <button id="flip-flashcard">Flip</button>
-          <button id="next-flashcard">Next</button>
+    <div class="main-content">
+      <div id="flashcard-container" style="display: none">
+        <h2>Study Session</h2>
+        <div id="flashcard">
+          <div id="question-text"></div>
+          <div id="answer-section">
+            <input
+              type="text"
+              id="user-answer"
+              placeholder="Type your answer..."
+            />
+            <button id="submit-answer">Submit Answer</button>
+            <div id="feedback-message" style="display: none"></div>
+          </div>
+          <div class="flashcard-btns">
+            <button id="close-flashcard">Close</button>
+            <button id="flip-flashcard">Flip</button>
+            <button id="next-flashcard">Next</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <button id="test-backend">Test Backend Connection</button>
-    <button id="test-database">Test Database Connection</button>
-
-    <!-- ===========================
-         Main Content Area
-         =========================== -->
-    <div class="main-content">
       <div class="content-wrapper">
         <!-- Leaderboard Container -->
         <div id="leaderboard-container">
@@ -177,6 +180,24 @@
             <button id="cancel-deck-button">Cancel</button>
           </div>
           <div id="deck-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add this template for editing flashcards -->
+    <div id="flashcard-edit-template" style="display: none">
+      <div class="flashcard-edit-form">
+        <input type="text" class="edit-question" placeholder="Question" />
+        <input type="text" class="edit-answer" placeholder="Answer" />
+        <select class="edit-points">
+          <option value="1">Easy (1 point)</option>
+          <option value="2">Medium (2 points)</option>
+          <option value="3">Hard (3 points)</option>
+          <option value="5">Expert (5 points)</option>
+        </select>
+        <div class="edit-buttons">
+          <button class="save-edit">Save</button>
+          <button class="cancel-edit">Cancel</button>
         </div>
       </div>
     </div>

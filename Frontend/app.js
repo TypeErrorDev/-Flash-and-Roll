@@ -23,37 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelDeckButton = document.getElementById("cancel-deck-button");
   const confirmModal = document.getElementById("confirm-modal");
 
-  // Add these with your other DOM element selections at the top
-  const testBackendButton = document.getElementById("test-backend");
-  const testDatabaseButton = document.getElementById("test-database");
-
-  // Add these event listeners
-  testBackendButton.addEventListener("click", async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/test");
-      const data = await response.json();
-      alert(data.message);
-    } catch (error) {
-      console.error("Backend connection test failed:", error);
-      alert("Failed to connect to backend: " + error.message);
-    }
-  });
-
-  testDatabaseButton.addEventListener("click", async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/test-db");
-      const data = await response.json();
-      alert(data.message + "\nSQLite Version: " + data.sqliteVersion);
-    } catch (error) {
-      console.error("Database connection test failed:", error);
-      alert("Failed to connect to database: " + error.message);
-    }
-  });
-
   // ===========================
   // Authentication Check
   // ===========================
-  // let decksContainer;
 
   const checkAuth = () => {
     console.log("Checking authentication...");
@@ -361,23 +333,23 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  function updateFlashcard(index) {
-    const question = flashcardQuestion.value.trim();
-    const answer = flashcardAnswer.value.trim();
-    if (question && answer) {
-      currentDeckFlashcards[index] = { question, answer };
-      flashcardQuestion.value = "";
-      flashcardAnswer.value = "";
-      updateFlashcardList();
-      addFlashcardButton.textContent = "Add Flashcard";
-      addFlashcardButton.onclick = addFlashcard;
-    }
-  }
+  // function updateFlashcard(index) {
+  //   const question = flashcardQuestion.value.trim();
+  //   const answer = flashcardAnswer.value.trim();
+  //   if (question && answer) {
+  //     currentDeckFlashcards[index] = { question, answer };
+  //     flashcardQuestion.value = "";
+  //     flashcardAnswer.value = "";
+  //     updateFlashcardList();
+  //     addFlashcardButton.textContent = "Add Flashcard";
+  //     addFlashcardButton.onclick = addFlashcard;
+  //   }
+  // }
 
-  function deleteFlashcard(index) {
-    currentDeckFlashcards.splice(index, 1);
-    updateFlashcardList();
-  }
+  // function deleteFlashcard(index) {
+  //   currentDeckFlashcards.splice(index, 1);
+  //   updateFlashcardList();
+  // }
 
   saveDeckButton.addEventListener("click", () => {
     const deckName = newDeckNameInput.value.trim();
@@ -502,25 +474,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // Navbar Event Listeners
   // ===========================
-  const addNavbarEventListeners = () => {
-    const menu = navbar.querySelector(".navbar-menu");
-    if (menu) {
-      menu.addEventListener("click", (e) => {
-        if (e.target.id === "sign-out-link") {
-          confirmModal.style.display = "flex";
-          document.body.classList.add("blur");
-          authContainer.style.display = "none";
-          settingsContainer.style.display = "none";
-          decksContainer.style.display = "none";
-          flashcardContainer.style.display = "none";
-        } else if (e.target.closest("#settings-link")) {
-          settingsContainer.style.display = "block";
-          flashcardContainer.style.display = "none";
-          decksContainer.style.display = "none";
-        }
-      });
-    }
-  };
 
   // ===========================
   // Settings Event Listeners
@@ -771,9 +724,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Call updateLeaderboard when the page loads
   updateLeaderboard();
 
-  // Add this to your initialization code
-  updateLeaderboard();
-
   // Add this function to submit a new score
   const testButton = document.createElement("button");
   testButton.textContent = "Test Score Submission";
@@ -784,16 +734,67 @@ document.addEventListener("DOMContentLoaded", () => {
     const deck = decks.find((d) => d.name === deckName);
     if (!deck) return;
 
-    // Show flashcard container above the tables
+    // Set the current deck name
+    currentDeck = deckName;
+
+    // Show flashcard container
     const flashcardContainer = document.getElementById("flashcard-container");
     flashcardContainer.style.display = "block";
-    flashcardContainer.classList.add("active");
 
-    // Don't hide the tables anymore
+    // Initialize deck state
+    currentCardIndex = 0;
+    currentScore = 0;
+
+    // Get the question text element
+    const questionText = document.getElementById("question-text");
+
+    // Set initial card content
+    if (deck.flashcards && deck.flashcards.length > 0) {
+      questionText.textContent = deck.flashcards[currentCardIndex].question;
+      console.log(
+        "Setting question:",
+        deck.flashcards[currentCardIndex].question
+      ); // Debug log
+    } else {
+      questionText.textContent = "No flashcards in this deck";
+    }
+
+    // Reset answer section
+    const userAnswerInput = document.getElementById("user-answer");
+    const feedbackMessage = document.getElementById("feedback-message");
+    if (userAnswerInput) userAnswerInput.value = "";
+    if (feedbackMessage) feedbackMessage.style.display = "none";
+
+    // Make sure the decks and leaderboard remain visible
     decksContainer.style.display = "block";
     leaderboardContainer.style.display = "block";
 
-    // Rest of your existing startDeck code...
+    // Add flip functionality
+    document.getElementById("flip-flashcard").addEventListener("click", () => {
+      const deck = decks.find((d) => d.name === currentDeck);
+      if (!deck) return;
+
+      const questionText = document.getElementById("question-text");
+      const currentCard = deck.flashcards[currentCardIndex];
+
+      if (isShowingQuestion) {
+        questionText.textContent = currentCard.answer;
+      } else {
+        questionText.textContent = currentCard.question;
+      }
+      isShowingQuestion = !isShowingQuestion;
+    });
+
+    // Add next card functionality
+    document.getElementById("next-flashcard").addEventListener("click", () => {
+      const deck = decks.find((d) => d.name === currentDeck);
+      if (!deck) return;
+
+      currentCardIndex = (currentCardIndex + 1) % deck.flashcards.length;
+      const questionText = document.getElementById("question-text");
+      questionText.textContent = deck.flashcards[currentCardIndex].question;
+      isShowingQuestion = true;
+    });
   };
 
   // Update the endDeck function
@@ -814,4 +815,77 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   `;
   document.head.appendChild(style);
+
+  // Add this event listener for the close button
+  const closeFlashcardButton = document.getElementById("close-flashcard");
+  if (closeFlashcardButton) {
+    closeFlashcardButton.addEventListener("click", () => {
+      const flashcardContainer = document.getElementById("flashcard-container");
+      flashcardContainer.style.display = "none";
+
+      // Reset any ongoing study session state if needed
+      currentCardIndex = 0;
+      currentScore = 0;
+
+      // Make sure the decks and leaderboard are visible
+      decksContainer.style.display = "block";
+      leaderboardContainer.style.display = "block";
+    });
+  }
+
+  // Add these event listeners and functions
+  document
+    .getElementById("submit-answer")
+    .addEventListener("click", checkAnswer);
+  const userAnswerInput = document.getElementById("user-answer");
+  const feedbackMessage = document.getElementById("feedback-message");
+
+  function checkAnswer() {
+    const deck = decks.find((d) => d.name === currentDeck);
+    if (!deck) return;
+
+    const currentCard = deck.flashcards[currentCardIndex];
+    const userAnswer = userAnswerInput.value.trim().toLowerCase();
+    const correctAnswer = currentCard.answer.toLowerCase();
+
+    feedbackMessage.style.display = "block";
+
+    if (userAnswer === correctAnswer) {
+      // Correct answer
+      feedbackMessage.textContent = `Correct answer! +${
+        currentCard.points || 1
+      } points`;
+      feedbackMessage.className = "correct";
+      currentScore += currentCard.points || 1;
+    } else {
+      // Incorrect answer
+      feedbackMessage.textContent = "Incorrect answer";
+      feedbackMessage.className = "incorrect";
+    }
+
+    // Show the correct answer
+    setTimeout(() => {
+      const questionText = document.getElementById("question-text");
+      questionText.textContent = currentCard.answer;
+      isShowingQuestion = false;
+    }, 1000);
+
+    // Clear the input field
+    userAnswerInput.value = "";
+  }
+
+  // Update the next card function to reset the answer section
+  document.getElementById("next-flashcard").addEventListener("click", () => {
+    const deck = decks.find((d) => d.name === currentDeck);
+    if (!deck) return;
+
+    currentCardIndex = (currentCardIndex + 1) % deck.flashcards.length;
+    const questionText = document.getElementById("question-text");
+    questionText.textContent = deck.flashcards[currentCardIndex].question;
+    isShowingQuestion = true;
+
+    // Reset answer section
+    userAnswerInput.value = "";
+    feedbackMessage.style.display = "none";
+  });
 });
