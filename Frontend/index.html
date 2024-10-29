@@ -144,6 +144,29 @@
     <button onclick="testBackendConnection()">Test Backend Connection</button>
     <button onclick="testDatabaseConnection()">Test Database Connection</button>
 
+    <div class="main-content">
+      <div id="decks-container">
+        <!-- Your existing decks content -->
+      </div>
+
+      <div id="leaderboard-container">
+        <h2>Top Scores</h2>
+        <table id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Scores will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <script src="app.js"></script>
   </body>
 </html>

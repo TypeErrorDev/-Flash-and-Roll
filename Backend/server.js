@@ -26,7 +26,44 @@ app.get("/api/test-db", (req, res) => {
   });
 });
 
-app.post("/app/scores", (req, res));
+// Add these endpoints for the leaderboard
+app.get("/api/scores", (req, res) => {
+  db.all(
+    `SELECT username, score, date 
+     FROM leaderboard 
+     ORDER BY score DESC 
+     LIMIT 10`,
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    }
+  );
+});
+
+app.post("/api/scores", (req, res) => {
+  const { username, score } = req.body;
+
+  if (!username || !score) {
+    res.status(400).json({ error: "Username and score are required" });
+    return;
+  }
+
+  db.run(
+    `INSERT INTO leaderboard (username, score) 
+     VALUES (?, ?)`,
+    [username, score],
+    function (err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json({ id: this.lastID });
+    }
+  );
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {

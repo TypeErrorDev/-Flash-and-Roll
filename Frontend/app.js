@@ -613,4 +613,61 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
   }
-}); // End of DOMContentLoaded
+
+  // Add this function to fetch and display scores
+  const updateLeaderboard = () => {
+    fetch("http://localhost:3000/api/scores")
+      .then((res) => res.json())
+      .then((scores) => {
+        const leaderboardBody = document.getElementById("leaderboard-body");
+        leaderboardBody.innerHTML = scores
+          .map(
+            (score, index) => `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${score.username}</td>
+              <td>${score.score}</td>
+              <td>${new Date(score.date).toLocaleDateString()}</td>
+            </tr>
+          `
+          )
+          .join("");
+      })
+      .catch((err) => console.error("Error fetching scores:", err));
+  };
+
+  // Add this to your initialization code
+  updateLeaderboard();
+
+  // Add this function to submit a new score
+  const submitScore = (score) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !user.displayName) {
+      console.error("No user logged in");
+      return;
+    }
+
+    fetch("http://localhost:3000/api/scores", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: user.displayName,
+        score: score,
+      }),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        updateLeaderboard(); // Refresh the leaderboard
+        console.log(`Score submitted for ${user.displayName}: ${score}`);
+      })
+      .catch((err) => console.error("Error submitting score:", err));
+  };
+
+  // Add this to test score submission
+  const testButton = document.createElement("button");
+  testButton.textContent = "Test Score Submission";
+  testButton.onclick = () => submitScore(Math.floor(Math.random() * 100));
+  document.body.appendChild(testButton);
+});
