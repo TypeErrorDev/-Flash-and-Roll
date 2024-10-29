@@ -140,6 +140,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     decksContainer.appendChild(table);
 
+    // Add event listeners for edit buttons
+    document.querySelectorAll(".edit-deck").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        console.log("Edit button clicked");
+        const deckName = e.target.dataset.deck;
+        console.log("Editing deck:", deckName);
+        editDeck(deckName);
+      });
+    });
+
     // Add event listeners for deck links
     document.querySelectorAll(".deck-link").forEach((link) => {
       link.addEventListener("click", (e) => {
@@ -321,16 +331,31 @@ document.addEventListener("DOMContentLoaded", () => {
   // Open Flashcards Function
   // ===========================
 
-  // TODO: I need to remove this and utilize the database to update the flashcard container
   const openFlashcards = (deckName) => {
     const decksContainer = document.getElementById("decks-container");
     const flashcardContainer = document.getElementById("flashcard-container");
 
+    // Find the selected deck
+    const selectedDeck = decks.find((deck) => deck.name === deckName);
+    if (!selectedDeck || !selectedDeck.flashcards.length) return;
+
+    let currentCardIndex = 0;
+    const questionText = document.getElementById("question-text");
+    let showingQuestion = true;
+
+    // Function to display current flashcard
+    const showCurrentCard = () => {
+      const currentCard = selectedDeck.flashcards[currentCardIndex];
+      questionText.textContent = showingQuestion
+        ? currentCard.question
+        : currentCard.answer;
+    };
+
+    // Show first card
+    showCurrentCard();
+
     decksContainer.style.display = "none";
     flashcardContainer.style.display = "block";
-
-    const questionText = document.getElementById("question-text");
-    questionText.textContent = "What is the capital of France?";
 
     document.getElementById("close-flashcard").onclick = () => {
       flashcardContainer.style.display = "none";
@@ -338,16 +363,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     document.getElementById("skip-flashcard").onclick = () => {
-      questionText.textContent = "Next question goes here.";
+      currentCardIndex =
+        (currentCardIndex + 1) % selectedDeck.flashcards.length;
+      showingQuestion = true;
+      showCurrentCard();
     };
 
     document.getElementById("flip-flashcard").onclick = () => {
-      questionText.textContent = "The answer is Paris.";
+      showingQuestion = !showingQuestion;
+      showCurrentCard();
     };
 
-    // Add event listener for the new Next button
     document.getElementById("next-flashcard").onclick = () => {
-      questionText.textContent = "Next question goes here.";
+      currentCardIndex =
+        (currentCardIndex + 1) % selectedDeck.flashcards.length;
+      showingQuestion = true;
+      showCurrentCard();
     };
   };
 
@@ -460,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("Local storage cleared. You have been signed out.");
     const flashcardContainer = document.getElementById("flashcard-container");
     flashcardContainer.style.display = "none";
-    decks = []; // Reset the decks array in memory
+    decks = [];
     checkAuth();
   });
 
