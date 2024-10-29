@@ -225,6 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   addDeckButton.addEventListener("click", () => {
     deckInput.style.display = "block";
+    addDeckButton.style.display = "none";
     currentDeckFlashcards = [];
     updateFlashcardList();
   });
@@ -303,12 +304,13 @@ document.addEventListener("DOMContentLoaded", () => {
         name: deckName,
         flashcards: currentDeckFlashcards,
         cardCount: currentDeckFlashcards.length,
-        category: "General", // You can add a category input if needed
+        category: "General",
       };
       decks.push(newDeck);
       saveDeckToLocalStorage();
       renderDecks();
       deckInput.style.display = "none";
+      addDeckButton.style.display = "block";
       newDeckNameInput.value = "";
       currentDeckFlashcards = [];
       updateFlashcardList();
@@ -317,6 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   cancelDeckButton.addEventListener("click", () => {
     deckInput.style.display = "none";
+    addDeckButton.style.display = "block";
     newDeckNameInput.value = "";
     currentDeckFlashcards = [];
     updateFlashcardList();
