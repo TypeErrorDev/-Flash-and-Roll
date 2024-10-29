@@ -702,18 +702,33 @@ document.addEventListener("DOMContentLoaded", () => {
       const scores = await response.json();
 
       const leaderboardBody = document.getElementById("leaderboard-body");
-      leaderboardBody.innerHTML = "";
 
-      scores.forEach((score, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${score.username}</td>
-          <td>${score.score}</td>
-          <td>${new Date(score.date).toLocaleDateString()}</td>
-        `;
-        leaderboardBody.appendChild(row);
-      });
+      // Fade out existing scores
+      leaderboardBody.style.opacity = "0";
+
+      setTimeout(() => {
+        leaderboardBody.innerHTML = "";
+
+        scores.forEach((score, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${score.username}</td>
+            <td>${score.score}</td>
+            <td>${new Date(score.date).toLocaleDateString()}</td>
+          `;
+
+          // Add animation delay based on position
+          row.style.animation = `fadeIn 0.5s ease-in-out ${
+            index * 0.1
+          }s forwards`;
+
+          leaderboardBody.appendChild(row);
+        });
+
+        // Fade in new scores
+        leaderboardBody.style.opacity = "1";
+      }, 300);
     } catch (error) {
       console.error("Error fetching scores:", error);
     }
@@ -910,4 +925,14 @@ document.addEventListener("DOMContentLoaded", () => {
       leaderboardContainer.style.display = "block";
     });
   };
+
+  // Add this CSS animation
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
 });

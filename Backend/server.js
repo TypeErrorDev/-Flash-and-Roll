@@ -19,21 +19,35 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "Backend is connected!" });
 });
 
+// Database test endpoint
+app.get("/api/test-db", (req, res) => {
+  db.get("SELECT sqlite_version()", (err, row) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json({
+      message: "Database is connected!",
+      sqliteVersion: row["sqlite_version()"],
+    });
+  });
+});
+
 // Get leaderboard scores
 app.get("/api/scores", (req, res) => {
   console.log("Scores endpoint hit");
   db.all(
     `SELECT username, score, datetime(date, 'localtime') as date
-         FROM leaderboard 
-         ORDER BY score DESC 
-         LIMIT 10`,
+     FROM leaderboard 
+     ORDER BY score DESC 
+     LIMIT 5`,
     (err, rows) => {
       if (err) {
         console.error("Database error:", err);
         res.status(500).json({ error: err.message });
         return;
       }
-      console.log("Sending scores:", rows);
+      console.log("Sending top 5 scores:", rows);
       res.json(rows);
     }
   );
@@ -41,8 +55,9 @@ app.get("/api/scores", (req, res) => {
 
 // Submit new score
 app.post("/api/scores", (req, res) => {
-  console.log("Score submission endpoint hit:", req.body);
-  const { username, score } = req.body;
+  console.log("Received request body:", req.body);
+
+  const { username, score, deckName } = req.body;
 
   if (!username || score === undefined) {
     return res.status(400).json({ error: "Username and score are required" });

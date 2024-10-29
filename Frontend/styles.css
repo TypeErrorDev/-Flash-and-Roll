@@ -343,50 +343,107 @@ button:hover {
 }
 
 .main-content {
-  display: flex;
-  gap: 40px;
   width: 100%;
   max-width: 1200px;
   margin: 20px auto;
   padding: 0 20px;
 }
 
-#decks-container {
-  flex: 1;
-  min-width: 0; /* Prevents flex item from overflowing */
+.content-wrapper {
+  display: flex;
+  gap: 30px;
+  justify-content: space-between;
 }
 
 #leaderboard-container {
-  flex: 0 0 300px; /* Fixed width for leaderboard */
+  flex: 0 0 40%; /* Takes up 40% of the space */
+  min-width: 300px;
 }
 
+#decks-container {
+  flex: 0 0 55%; /* Takes up 55% of the space */
+  min-width: 400px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 900px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+
+  #leaderboard-container,
+  #decks-container {
+    flex: 1;
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Update existing table styles */
 #leaderboard-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
 }
 
-#leaderboard-table th,
-#leaderboard-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+/* Dark theme support */
+body[data-theme="dark"] .content-wrapper {
+  background-color: #333;
+}
+
+body[data-theme="dark"] #leaderboard-container,
+body[data-theme="dark"] #decks-container {
+  background-color: #444;
+  border-radius: 8px;
+  padding: 20px;
 }
 
 #leaderboard-table th {
   background-color: #007bff;
   color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+#leaderboard-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+#leaderboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+#leaderboard-table tr:nth-child(1) {
+  background-color: #ffd700; /* Gold for 1st place */
+}
+
+#leaderboard-table tr:nth-child(2) {
+  background-color: #c0c0c0; /* Silver for 2nd place */
+}
+
+#leaderboard-table tr:nth-child(3) {
+  background-color: #cd7f32; /* Bronze for 3rd place */
 }
 
 /* Dark theme support */
 body[data-theme="dark"] #leaderboard-table {
-  background-color: #444;
-  color: #fff;
+  background: #444;
 }
 
 body[data-theme="dark"] #leaderboard-table td {
   border-bottom: 1px solid #555;
+  color: #fff;
+}
+
+body[data-theme="dark"] #leaderboard-table tr:nth-child(1),
+body[data-theme="dark"] #leaderboard-table tr:nth-child(2),
+body[data-theme="dark"] #leaderboard-table tr:nth-child(3) {
+  color: #000; /* Keep text dark for medal positions */
 }
 
 #deck-input select {
