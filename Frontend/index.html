@@ -68,39 +68,6 @@
     </div>
 
     <!-- ===========================
-         Decks Container
-         =========================== -->
-    <div id="decks-container">
-      <h2>Your Decks</h2>
-      <button id="add-deck-button">Add Deck</button>
-      <div id="deck-input" style="display: none">
-        <input type="text" id="new-deck-name" placeholder="Deck Name" />
-        <input
-          type="text"
-          id="deck-category"
-          placeholder="Enter Category (e.g., Math, Science, History)"
-        />
-        <div id="flashcard-form">
-          <input type="text" id="flashcard-question" placeholder="Question" />
-          <input type="text" id="flashcard-answer" placeholder="Answer" />
-          <select id="flashcard-points">
-            <option value="1">Easy (1 point)</option>
-            <option value="2">Medium (2 points)</option>
-            <option value="3">Hard (3 points)</option>
-            <option value="5">Expert (5 points)</option>
-          </select>
-          <button id="add-flashcard-button">Add Flashcard</button>
-        </div>
-        <div id="flashcard-list-container">
-          <ul id="flashcard-list"></ul>
-        </div>
-        <button id="save-deck-button">Save Deck</button>
-        <button id="cancel-deck-button">Cancel</button>
-      </div>
-      <div id="deck-list"></div>
-    </div>
-
-    <!-- ===========================
          Settings Container
          =========================== -->
     <div id="settings-container" style="display: none">
@@ -125,7 +92,6 @@
     <!-- ===========================
          Modal for Logout Confirmation
          =========================== -->
-
     <div id="confirm-modal" class="modal">
       <div class="modal-content">
         <h2 id="confirm-message">
@@ -138,8 +104,8 @@
     </div>
 
     <!-- ===========================
-     Flashcard Container
-     =========================== -->
+         Flashcard Container
+         =========================== -->
     <div id="flashcard-container" style="display: none">
       <div id="flashcard">
         <div id="question-text">What is the capital of France?</div>
@@ -155,8 +121,12 @@
     <button id="test-backend">Test Backend Connection</button>
     <button id="test-database">Test Database Connection</button>
 
+    <!-- ===========================
+         Main Content Area
+         =========================== -->
     <div class="main-content">
       <div class="content-wrapper">
+        <!-- Leaderboard Container -->
         <div id="leaderboard-container">
           <h2>Top 5 High Scores</h2>
           <table id="leaderboard-table">
@@ -174,6 +144,7 @@
           </table>
         </div>
 
+        <!-- Decks Container -->
         <div id="decks-container">
           <h2>Your Decks</h2>
           <button id="add-deck-button">Add Deck</button>

@@ -226,14 +226,10 @@ th {
    =========================== */
 #flashcard-container {
   width: 100%;
-  max-width: 600px;
-  min-height: 400px;
-  margin: 20px auto;
+  max-width: 1200px;
+  margin: 20px auto 40px auto;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+  display: none;
 }
 
 /* ===========================
@@ -356,12 +352,12 @@ button:hover {
 }
 
 #leaderboard-container {
-  flex: 0 0 40%; /* Takes up 40% of the space */
+  flex: 0 0 40%;
   min-width: 300px;
 }
 
 #decks-container {
-  flex: 0 0 55%; /* Takes up 55% of the space */
+  flex: 0 0 55%;
   min-width: 400px;
 }
 
@@ -694,4 +690,19 @@ body[data-theme="dark"] .progress-info p {
 
 body[data-theme="dark"] #flashcard-container h2 {
   color: #fff;
+}
+
+/* Add styles for active flashcard session */
+body.active-flashcards .main-content {
+  display: flex;
+  flex-direction: column;
+}
+
+body.active-flashcards #flashcard-container {
+  display: block;
+  order: 1;
+}
+
+body.active-flashcards .content-wrapper {
+  order: 2;
 }
