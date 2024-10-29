@@ -1,7 +1,3 @@
-// Global variables
-let decks = [];
-let currentDeckFlashcards = [];
-
 document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // DOM Elements Selection
@@ -25,6 +21,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const addDeckButton = document.getElementById("add-deck-button");
   const saveDeckButton = document.getElementById("save-deck-button");
   const cancelDeckButton = document.getElementById("cancel-deck-button");
+  const confirmModal = document.getElementById("confirm-modal");
+
+  // Add these with your other DOM element selections at the top
+  const testBackendButton = document.getElementById("test-backend");
+  const testDatabaseButton = document.getElementById("test-database");
+
+  // Add these event listeners
+  testBackendButton.addEventListener("click", async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/test");
+      const data = await response.json();
+      alert(data.message);
+    } catch (error) {
+      console.error("Backend connection test failed:", error);
+      alert("Failed to connect to backend: " + error.message);
+    }
+  });
+
+  testDatabaseButton.addEventListener("click", async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/test-db");
+      const data = await response.json();
+      alert(data.message + "\nSQLite Version: " + data.sqliteVersion);
+    } catch (error) {
+      console.error("Database connection test failed:", error);
+      alert("Failed to connect to database: " + error.message);
+    }
+  });
 
   // ===========================
   // Authentication Check
@@ -668,58 +692,74 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // Add this function to fetch and display scores
-  const updateLeaderboard = () => {
-    fetch("http://localhost:3000/api/scores")
-      .then((res) => res.json())
-      .then((scores) => {
-        const leaderboardBody = document.getElementById("leaderboard-body");
-        leaderboardBody.innerHTML = scores
-          .map(
-            (score, index) => `
-            <tr>
-              <td>${index + 1}</td>
-              <td>${score.username}</td>
-              <td>${score.score}</td>
-              <td>${new Date(score.date).toLocaleDateString()}</td>
-            </tr>
-          `
-          )
-          .join("");
-      })
-      .catch((err) => console.error("Error fetching scores:", err));
+  // Add this function to handle leaderboard updates
+  const updateLeaderboard = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/scores");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const scores = await response.json();
+
+      const leaderboardBody = document.getElementById("leaderboard-body");
+      leaderboardBody.innerHTML = "";
+
+      scores.forEach((score, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${score.username}</td>
+          <td>${score.score}</td>
+          <td>${new Date(score.date).toLocaleDateString()}</td>
+        `;
+        leaderboardBody.appendChild(row);
+      });
+    } catch (error) {
+      console.error("Error fetching scores:", error);
+    }
   };
+
+  // Add this function to handle score submission
+  const submitScore = async (score) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.displayName) {
+        console.error("No user found");
+        return;
+      }
+
+      const response = await fetch("http://localhost:3000/api/scores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: user.displayName,
+          score: score,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Score submitted successfully:", result);
+
+      // Update the leaderboard after submitting a score
+      updateLeaderboard();
+    } catch (error) {
+      console.error("Error submitting score:", error);
+    }
+  };
+
+  // Call updateLeaderboard when the page loads
+  updateLeaderboard();
 
   // Add this to your initialization code
   updateLeaderboard();
 
   // Add this function to submit a new score
-  const submitScore = (score) => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user || !user.displayName) {
-      console.error("No user logged in");
-      return;
-    }
-
-    fetch("http://localhost:3000/api/scores", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: user.displayName,
-        score: score,
-      }),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        updateLeaderboard(); // Refresh the leaderboard
-        console.log(`Score submitted for ${user.displayName}: ${score}`);
-      })
-      .catch((err) => console.error("Error submitting score:", err));
-  };
-
-  // Add this to test score submission
   const testButton = document.createElement("button");
   testButton.textContent = "Test Score Submission";
   testButton.onclick = () => submitScore(Math.floor(Math.random() * 100));
