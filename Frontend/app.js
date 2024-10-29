@@ -351,20 +351,26 @@ document.addEventListener("DOMContentLoaded", () => {
         : currentCard.answer;
     };
 
+    // Function to return to deck list
+    const returnToDeckList = () => {
+      flashcardContainer.style.display = "none";
+      decksContainer.style.display = "block";
+    };
+
     // Show first card
     showCurrentCard();
 
     decksContainer.style.display = "none";
     flashcardContainer.style.display = "block";
 
-    document.getElementById("close-flashcard").onclick = () => {
-      flashcardContainer.style.display = "none";
-      decksContainer.style.display = "block";
-    };
+    document.getElementById("close-flashcard").onclick = returnToDeckList;
 
     document.getElementById("skip-flashcard").onclick = () => {
-      currentCardIndex =
-        (currentCardIndex + 1) % selectedDeck.flashcards.length;
+      currentCardIndex++;
+      if (currentCardIndex >= selectedDeck.flashcards.length) {
+        returnToDeckList();
+        return;
+      }
       showingQuestion = true;
       showCurrentCard();
     };
@@ -375,8 +381,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     document.getElementById("next-flashcard").onclick = () => {
-      currentCardIndex =
-        (currentCardIndex + 1) % selectedDeck.flashcards.length;
+      currentCardIndex++;
+      if (currentCardIndex >= selectedDeck.flashcards.length) {
+        returnToDeckList();
+        return;
+      }
       showingQuestion = true;
       showCurrentCard();
     };
