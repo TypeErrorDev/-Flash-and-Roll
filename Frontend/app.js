@@ -784,17 +784,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const deck = decks.find((d) => d.name === deckName);
     if (!deck) return;
 
-    // Show flashcard container
-    document.body.classList.add("active-flashcards");
+    // Show flashcard container above the tables
+    const flashcardContainer = document.getElementById("flashcard-container");
     flashcardContainer.style.display = "block";
+    flashcardContainer.classList.add("active");
+
+    // Don't hide the tables anymore
+    decksContainer.style.display = "block";
+    leaderboardContainer.style.display = "block";
 
     // Rest of your existing startDeck code...
   };
 
   // Update the endDeck function
   const endDeck = () => {
-    document.body.classList.remove("active-flashcards");
+    const flashcardContainer = document.getElementById("flashcard-container");
     flashcardContainer.style.display = "none";
+    flashcardContainer.classList.remove("active");
+
     // Rest of your existing endDeck code...
   };
 
