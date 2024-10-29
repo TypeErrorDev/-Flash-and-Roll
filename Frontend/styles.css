@@ -225,28 +225,26 @@ th {
    Flashcard Container Styles
    =========================== */
 #flashcard-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 400px;
-  height: 250px;
+  width: 100%;
+  max-width: 600px;
+  min-height: 400px;
   margin: 20px auto;
-  border: 2px solid #007bff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  background-color: white;
-  position: relative;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 
 /* ===========================
    Flashcard Styles
    =========================== */
 #flashcard {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
+  width: 100%;
+  max-width: 500px;
+  height: 300px;
+  margin: 0 auto;
+  perspective: 1000px;
 }
 
 #question-text {
@@ -435,4 +433,208 @@ body[data-theme="dark"] #deck-input input[type="text"] {
   background-color: #444;
   color: #fff;
   border-color: #555;
+}
+
+.flashcard {
+  width: 100%;
+  max-width: 500px;
+  height: 300px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+
+.flashcard-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flashcard-front,
+.flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.flashcard-front p,
+.flashcard-back p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 100%;
+  word-wrap: break-word;
+  color: #333;
+}
+
+.flashcard-back .points {
+  margin-top: 20px;
+  font-size: 1rem;
+  color: #007bff;
+}
+
+.flashcard-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.control-btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+#skip-card {
+  background-color: #6c757d;
+  color: white;
+}
+
+#skip-card:hover {
+  background-color: #5a6268;
+}
+
+#flip-card {
+  background-color: #007bff;
+  color: white;
+}
+
+#flip-card:hover {
+  background-color: #0056b3;
+}
+
+#answer-card {
+  background-color: #28a745;
+  color: white;
+}
+
+#answer-card:hover {
+  background-color: #218838;
+}
+
+#submit-card {
+  background-color: #17a2b8;
+  color: white;
+}
+
+#submit-card:hover {
+  background-color: #138496;
+}
+
+.end-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #dc3545;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.end-btn:hover {
+  background-color: #c82333;
+}
+
+/* Dark theme support */
+body[data-theme="dark"] .control-btn {
+  opacity: 0.9;
+}
+
+body[data-theme="dark"] .control-btn:hover {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #flashcard-container {
+    padding: 10px;
+  }
+
+  .flashcard {
+    height: 250px;
+  }
+
+  .flashcard-front p,
+  .flashcard-back p {
+    font-size: 1rem;
+  }
+
+  .flashcard-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .control-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Light theme (default) */
+body[data-theme="light"] .flashcard-front,
+body[data-theme="light"] .flashcard-back {
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="light"] .flashcard-front p,
+body[data-theme="light"] .flashcard-back p {
+  color: #333;
+}
+
+body[data-theme="light"] .flashcard-back .points {
+  color: #007bff;
+}
+
+/* Dark theme */
+body[data-theme="dark"] .flashcard-front,
+body[data-theme="dark"] .flashcard-back {
+  background: #444;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .flashcard-front p,
+body[data-theme="dark"] .flashcard-back p {
+  color: #fff;
+}
+
+body[data-theme="dark"] .flashcard-back .points {
+  color: #66b0ff;
+}
+
+/* Progress info text colors */
+.progress-info p {
+  color: #333;
+}
+
+body[data-theme="dark"] .progress-info p {
+  color: #fff;
+}
+
+/* Deck title colors */
+#flashcard-container h2 {
+  color: #333;
+}
+
+body[data-theme="dark"] #flashcard-container h2 {
+  color: #fff;
 }

@@ -1,30 +1,6 @@
-function testBackendConnection() {
-  fetch("http://localhost:3000/api/test")
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("Response from backend:", data);
-      alert(data.message);
-    })
-    .catch((err) => {
-      console.error("Error testing backend connection:", err);
-      alert(
-        "Failed to connect to backend. Please ensure the backend server is running."
-      );
-    });
-}
-
-function testDatabaseConnection() {
-  fetch("http://localhost:3000/api/test-db")
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("Database response:", data);
-      alert(data.message);
-    })
-    .catch((err) => {
-      console.error("Error testing database:", err);
-      alert("Failed to connect to database");
-    });
-}
+// Global variables
+let decks = [];
+let currentDeckFlashcards = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   // ===========================
@@ -33,32 +9,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const navbar = document.getElementById("navbar");
   const authContainer = document.getElementById("auth-container");
   const settingsContainer = document.getElementById("settings-container");
+  const decksContainer = document.getElementById("decks-container");
+  const leaderboardContainer = document.getElementById("leaderboard-container");
+  const flashcardContainer = document.getElementById("flashcard-container");
   const authForm = document.getElementById("auth-form");
   const displayNameInput = document.getElementById("display-name");
   const themeToggle = document.getElementById("theme-toggle");
   const themeIcon = document.getElementById("theme-icon");
-  const confirmModal = document.getElementById("confirm-modal");
-  const addDeckButton = document.getElementById("add-deck-button");
-  const saveDeckButton = document.getElementById("save-deck-button");
-  const cancelDeckButton = document.getElementById("cancel-deck-button");
   const deckInput = document.getElementById("deck-input");
   const newDeckNameInput = document.getElementById("new-deck-name");
   const flashcardQuestion = document.getElementById("flashcard-question");
   const flashcardAnswer = document.getElementById("flashcard-answer");
   const addFlashcardButton = document.getElementById("add-flashcard-button");
   const flashcardList = document.getElementById("flashcard-list");
-  const deckCategoryInput = document.getElementById("deck-category");
-  const flashcardPointsSelect = document.getElementById("flashcard-points");
+  const addDeckButton = document.getElementById("add-deck-button");
+  const saveDeckButton = document.getElementById("save-deck-button");
+  const cancelDeckButton = document.getElementById("cancel-deck-button");
 
   // ===========================
   // Authentication Check
   // ===========================
-  let decksContainer;
+  // let decksContainer;
 
   const checkAuth = () => {
     console.log("Checking authentication...");
     const user = JSON.parse(localStorage.getItem("user"));
-    decksContainer = document.getElementById("decks-container");
     const flashcardContainer = document.getElementById("flashcard-container");
     const settingsContainer = document.getElementById("settings-container");
 
@@ -287,8 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  let currentDeckFlashcards = [];
-
   addDeckButton.addEventListener("click", () => {
     deckInput.style.display = "block";
     addDeckButton.style.display = "none";
@@ -443,7 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
 
   const openFlashcards = (deckName) => {
-    const decksContainer = document.getElementById("decks-container");
+    // const decksContainer = document.getElementById("decks-container");
     const flashcardContainer = document.getElementById("flashcard-container");
 
     // Find the selected deck
@@ -530,7 +503,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   const addSettingsEventListeners = () => {
     const settingsContainer = document.getElementById("settings-container");
-    decksContainer = document.getElementById("decks-container"); // Define decksContainer here
 
     if (settingsContainer) {
       const goHomeLink = document.getElementById("go-home-link");
@@ -752,4 +724,150 @@ document.addEventListener("DOMContentLoaded", () => {
   testButton.textContent = "Test Score Submission";
   testButton.onclick = () => submitScore(Math.floor(Math.random() * 100));
   document.body.appendChild(testButton);
+
+  const startDeck = (deckName) => {
+    const deck = decks.find((d) => d.name === deckName);
+    if (!deck) return;
+
+    // Hide other containers
+    decksContainer.style.display = "none";
+    leaderboardContainer.style.display = "none";
+    settingsContainer.style.display = "none";
+
+    // Show flashcard container
+    flashcardContainer.style.display = "block";
+
+    // Initialize deck state
+    let currentCardIndex = 0;
+    let currentScore = 0;
+    const totalCards = deck.flashcards.length;
+
+    // Update flashcard display
+    const updateCardDisplay = () => {
+      const card = deck.flashcards[currentCardIndex];
+      const cardDisplay = document.getElementById("flashcard-display");
+
+      if (!cardDisplay) {
+        flashcardContainer.innerHTML = `
+          <h2>${deck.name} - ${deck.category}</h2>
+          <div id="flashcard-display" class="flashcard">
+            <div class="flashcard-content">
+              <div class="flashcard-front">
+                <p>${card.question}</p>
+              </div>
+              <div class="flashcard-back" style="display: none;">
+                <p>${card.answer}</p>
+                <p class="points">Points: ${card.points}</p>
+              </div>
+            </div>
+          </div>
+          <div class="flashcard-controls">
+            <button id="skip-card" class="control-btn">Skip</button>
+            <button id="flip-card" class="control-btn">Flip</button>
+            <button id="answer-card" class="control-btn" style="display: none;">Answer</button>
+            <button id="submit-card" class="control-btn" style="display: none;">Submit</button>
+          </div>
+          <div class="progress-info">
+            <p>Card ${currentCardIndex + 1} of ${totalCards}</p>
+            <p>Current Score: ${currentScore}</p>
+          </div>
+          <button id="end-deck" class="end-btn">End Practice</button>
+        `;
+
+        // Add event listeners for the buttons
+        document.getElementById("flip-card").addEventListener("click", () => {
+          const front = document.querySelector(".flashcard-front");
+          const back = document.querySelector(".flashcard-back");
+          const answerBtn = document.getElementById("answer-card");
+          const submitBtn = document.getElementById("submit-card");
+          const flipBtn = document.getElementById("flip-card");
+
+          front.style.display = "none";
+          back.style.display = "block";
+          answerBtn.style.display = "block";
+          submitBtn.style.display = "block";
+          flipBtn.style.display = "none";
+        });
+
+        document.getElementById("skip-card").addEventListener("click", () => {
+          currentCardIndex++;
+          if (currentCardIndex < totalCards) {
+            updateCardDisplay();
+          } else {
+            endDeck();
+          }
+        });
+
+        document.getElementById("answer-card").addEventListener("click", () => {
+          const front = document.querySelector(".flashcard-front");
+          const back = document.querySelector(".flashcard-back");
+
+          if (back.style.display === "block") {
+            back.style.display = "none";
+            front.style.display = "block";
+          } else {
+            front.style.display = "none";
+            back.style.display = "block";
+          }
+        });
+
+        document.getElementById("submit-card").addEventListener("click", () => {
+          currentScore += parseInt(card.points);
+          currentCardIndex++;
+
+          if (currentCardIndex < totalCards) {
+            updateCardDisplay();
+          } else {
+            endDeck();
+          }
+        });
+
+        document.getElementById("end-deck").addEventListener("click", () => {
+          if (confirm("Are you sure you want to end this practice session?")) {
+            endDeck();
+          }
+        });
+      } else {
+        // Update existing display
+        const front = document.querySelector(".flashcard-front");
+        const back = document.querySelector(".flashcard-back");
+        const flipBtn = document.getElementById("flip-card");
+        const answerBtn = document.getElementById("answer-card");
+        const submitBtn = document.getElementById("submit-card");
+
+        front.innerHTML = `<p>${card.question}</p>`;
+        back.innerHTML = `<p>${card.answer}</p><p class="points">Points: ${card.points}</p>`;
+        front.style.display = "block";
+        back.style.display = "none";
+        flipBtn.style.display = "block";
+        answerBtn.style.display = "none";
+        submitBtn.style.display = "none";
+
+        document.querySelector(".progress-info").innerHTML = `
+          <p>Card ${currentCardIndex + 1} of ${totalCards}</p>
+          <p>Current Score: ${currentScore}</p>
+        `;
+      }
+    };
+
+    // Start with first card
+    updateCardDisplay();
+  };
+  // Add this helper function
+  const endDeck = () => {
+    flashcardContainer.innerHTML = `
+      <h2>Deck Completed!</h2>
+      <p>Final Score: ${currentScore}</p>
+      <button id="return-to-decks" class="control-btn">Return to Decks</button>
+    `;
+
+    // Submit score to leaderboard
+    submitScore(currentScore);
+
+    document.getElementById("return-to-decks").addEventListener("click", () => {
+      flashcardContainer.style.display = "none";
+      decksContainer.style.display = "block";
+      leaderboardContainer.style.display = "block";
+    });
+  };
 });
