@@ -1,7 +1,41 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ===========================
-  // DOM Elements Selection
-  // ===========================
+  // First, define the DEFAULT_DECK constant
+  const DEFAULT_DECK = {
+    name: "JavaScript Info",
+    category: "JavaScript",
+    flashcards: [
+      {
+        question: "What is the difference between let and var?",
+        answer: "block scope vs function scope",
+        points: 2,
+      },
+      {
+        question: "What is a closure in JavaScript?",
+        answer: "function with access to outer scope",
+        points: 3,
+      },
+      {
+        question: "What is the purpose of 'use strict'?",
+        answer: "catches coding mistakes",
+        points: 1,
+      },
+      {
+        question: "What is the difference between == and ===?",
+        answer: "type coercion vs strict equality",
+        points: 2,
+      },
+      {
+        question: "What is a Promise in JavaScript?",
+        answer: "handles async operations",
+        points: 3,
+      },
+      // ... rest of the flashcards ...
+    ],
+    cardCount: 20,
+    totalPoints: 40,
+  };
+
+  // Then define DOM elements
   const DOM = {
     navbar: document.getElementById("navbar"),
     auth: {
@@ -41,8 +75,38 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     modal: {
       confirm: document.getElementById("confirm-modal"),
+      yesButton: document.getElementById("confirm-yes"),
+      noButton: document.getElementById("confirm-no"),
+      cancelButton: document.getElementById("confirm-cancel"),
+      message: document.getElementById("confirm-message"),
     },
   };
+
+  // Then define the loadDecksFromLocalStorage function that uses DEFAULT_DECK
+  const loadDecksFromLocalStorage = () => {
+    const savedDecks = localStorage.getItem("decks");
+    if (savedDecks) {
+      decks = JSON.parse(savedDecks);
+      console.log("Loaded decks:", decks);
+    } else {
+      // Calculate total points for default deck
+      const totalPoints = DEFAULT_DECK.flashcards.reduce(
+        (sum, card) => sum + Number(card.points),
+        0
+      );
+      DEFAULT_DECK.totalPoints = totalPoints;
+
+      // Set default deck as the only deck
+      decks = [DEFAULT_DECK];
+
+      // Save to localStorage
+      localStorage.setItem("decks", JSON.stringify(decks));
+      console.log("Created default deck:", decks);
+    }
+  };
+
+  // Initialize decks array
+  let decks = [];
 
   // ===========================
   // Authentication Check
@@ -77,12 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       DOM.navbar.addEventListener("click", (e) => {
         if (e.target.id === "sign-out-link") {
-          DOM.modal.confirm.style.display = "flex";
-          document.body.classList.add("blur");
-          DOM.auth.container.style.display = "none";
-          DOM.settings.container.style.display = "none";
-          DOM.deck.container.style.display = "none";
-          DOM.flashcard.container.style.display = "none";
+          handleSignOut();
         } else if (e.target.id === "settings-link") {
           DOM.settings.container.style.display = "block";
           DOM.flashcard.container.style.display = "none";
@@ -109,17 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // Render Decks Function
   // ===========================
-  let decks = [];
-
-  const loadDecksFromLocalStorage = () => {
-    const savedDecks = localStorage.getItem("decks");
-    if (savedDecks) {
-      decks = JSON.parse(savedDecks);
-      console.log("Loaded decks:", decks); // Debug log
-    } else {
-      decks = [];
-    }
-  };
 
   const renderDecks = () => {
     const deckList = document.getElementById("deck-list");
@@ -586,31 +634,48 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // Confirm Modal Actions
   // ===========================
-  document.getElementById("confirm-yes").addEventListener("click", () => {
-    console.log("Clearing all data...");
-    localStorage.clear();
-    confirmModal.style.display = "none";
-    alert("Local storage cleared. You have been signed out.");
-    const flashcardContainer = document.getElementById("flashcard-container");
-    flashcardContainer.style.display = "none";
-    decks = [];
-    checkAuth();
-  });
+  const handleSignOut = () => {
+    // Show modal and add blur effect
+    DOM.modal.confirm.style.display = "flex";
+    document.body.classList.add("blur");
 
-  document.getElementById("confirm-no").addEventListener("click", () => {
-    console.log("Signing out without clearing data...");
-    confirmModal.style.display = "none";
-    alert("You have been signed out. Your data remains.");
-    localStorage.removeItem("user");
-    const flashcardContainer = document.getElementById("flashcard-container");
-    flashcardContainer.style.display = "none";
-    checkAuth();
-  });
+    // Handle Yes button click
+    DOM.modal.yesButton.addEventListener("click", () => {
+      // Clear all data
+      localStorage.clear();
 
-  document.getElementById("confirm-cancel").addEventListener("click", () => {
-    confirmModal.style.display = "none";
-    document.body.classList.remove("blur");
-  });
+      // Hide modal and remove blur
+      DOM.modal.confirm.style.display = "none";
+      document.body.classList.remove("blur");
+
+      // Reset UI state
+      DOM.auth.container.style.display = "flex";
+      DOM.deck.container.style.display = "none";
+      DOM.settings.container.style.display = "none";
+      DOM.flashcard.container.style.display = "none";
+
+      // Remove navbar menu
+      const menu = DOM.navbar.querySelector(".navbar-menu");
+      if (menu) menu.remove();
+
+      // Reload decks
+      loadDecksFromLocalStorage();
+    });
+
+    // Handle No button click
+    DOM.modal.noButton.addEventListener("click", () => {
+      // Just hide modal and remove blur
+      DOM.modal.confirm.style.display = "none";
+      document.body.classList.remove("blur");
+    });
+
+    // Handle Cancel button click
+    DOM.modal.cancelButton.addEventListener("click", () => {
+      // Just hide modal and remove blur
+      DOM.modal.confirm.style.display = "none";
+      document.body.classList.remove("blur");
+    });
+  };
 
   // ===========================
   // Initial Check
@@ -771,64 +836,134 @@ document.addEventListener("DOMContentLoaded", () => {
     currentDeck = deckName;
 
     // Show flashcard container
-    const flashcardContainer = document.getElementById("flashcard-container");
-    flashcardContainer.style.display = "block";
+    DOM.flashcard.container.style.display = "block";
 
     // Initialize deck state
     currentCardIndex = 0;
     currentScore = 0;
 
-    // Get the question text element
+    // Get DOM elements once
     const questionText = document.getElementById("question-text");
+    const userAnswerInput = document.getElementById("user-answer");
+    const feedbackMessage = document.getElementById("feedback-message");
+    const submitButton = document.getElementById("submit-answer");
+
+    // Clear any previous event listeners
+    const newSubmitButton = submitButton.cloneNode(true);
+    submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
+
+    // Add new event listeners
+    newSubmitButton.addEventListener("click", () => {
+      const answer = userAnswerInput.value;
+      console.log("Submit clicked, user answer:", answer);
+      checkAnswer(answer);
+    });
+
+    userAnswerInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        const answer = userAnswerInput.value;
+        console.log("Enter pressed, user answer:", answer);
+        checkAnswer(answer);
+      }
+    });
 
     // Set initial card content
     if (deck.flashcards && deck.flashcards.length > 0) {
       questionText.textContent = deck.flashcards[currentCardIndex].question;
-      console.log(
-        "Setting question:",
-        deck.flashcards[currentCardIndex].question
-      ); // Debug log
-    } else {
-      questionText.textContent = "No flashcards in this deck";
+      console.log("Initial card set:", deck.flashcards[currentCardIndex]);
     }
 
-    // Reset answer section
+    // Reset input and feedback
+    userAnswerInput.value = "";
+    userAnswerInput.disabled = false;
+    feedbackMessage.style.display = "none";
+  };
+
+  function checkAnswer(userInput) {
+    const deck = decks.find((d) => d.name === currentDeck);
+    if (!deck) return;
+
+    const currentCard = deck.flashcards[currentCardIndex];
     const userAnswerInput = document.getElementById("user-answer");
     const feedbackMessage = document.getElementById("feedback-message");
-    if (userAnswerInput) userAnswerInput.value = "";
-    if (feedbackMessage) feedbackMessage.style.display = "none";
+    const questionText = document.getElementById("question-text");
+    const submitButton = document.getElementById("submit-answer");
 
-    // Make sure the decks and leaderboard remain visible
-    DOM.deck.container.style.display = "block";
-    DOM.leaderboard.container.style.display = "block";
+    // Store original values
+    const originalUserInput = userInput;
+    const originalCorrectAnswer = currentCard.answer;
 
-    // Add flip functionality
-    document.getElementById("flip-flashcard").addEventListener("click", () => {
-      const deck = decks.find((d) => d.name === currentDeck);
-      if (!deck) return;
+    // Clean up both answers
+    const userAnswer = userInput.trim().toLowerCase();
+    const correctAnswer = currentCard.answer.trim().toLowerCase();
 
-      const questionText = document.getElementById("question-text");
-      const currentCard = deck.flashcards[currentCardIndex];
-
-      if (isShowingQuestion) {
-        questionText.textContent = currentCard.answer;
-      } else {
-        questionText.textContent = currentCard.question;
-      }
-      isShowingQuestion = !isShowingQuestion;
+    // SUPER detailed debugging
+    console.log("=== ANSWER DEBUGGING ===");
+    console.log("Original values:", {
+      userInput: originalUserInput,
+      correctAnswer: originalCorrectAnswer,
     });
 
-    // Add next card functionality
-    document.getElementById("next-flashcard").addEventListener("click", () => {
-      const deck = decks.find((d) => d.name === currentDeck);
-      if (!deck) return;
-
-      currentCardIndex = (currentCardIndex + 1) % deck.flashcards.length;
-      const questionText = document.getElementById("question-text");
-      questionText.textContent = deck.flashcards[currentCardIndex].question;
-      isShowingQuestion = true;
+    console.log("Cleaned values:", {
+      userAnswer: userAnswer,
+      correctAnswer: correctAnswer,
     });
-  };
+
+    console.log("String lengths:", {
+      userOriginal: originalUserInput.length,
+      userCleaned: userAnswer.length,
+      correctOriginal: originalCorrectAnswer.length,
+      correctCleaned: correctAnswer.length,
+    });
+
+    console.log("Character by character comparison:");
+    const maxLength = Math.max(userAnswer.length, correctAnswer.length);
+    for (let i = 0; i < maxLength; i++) {
+      console.log(`Position ${i}:`, {
+        userChar: userAnswer[i] || "END",
+        userCharCode: userAnswer[i] ? userAnswer[i].charCodeAt(0) : "N/A",
+        correctChar: correctAnswer[i] || "END",
+        correctCharCode: correctAnswer[i]
+          ? correctAnswer[i].charCodeAt(0)
+          : "N/A",
+        matches: userAnswer[i] === correctAnswer[i],
+      });
+    }
+
+    // Try multiple comparison methods
+    const exactMatch = userAnswer === correctAnswer;
+    const looseMatch =
+      userAnswer.replace(/\s+/g, "") === correctAnswer.replace(/\s+/g, "");
+    const includesMatch =
+      correctAnswer.includes(userAnswer) || userAnswer.includes(correctAnswer);
+
+    console.log("Match results:", {
+      exactMatch,
+      looseMatch,
+      includesMatch,
+    });
+
+    // For now, let's consider any of these matches as correct
+    const isCorrect = exactMatch || looseMatch || includesMatch;
+
+    feedbackMessage.style.display = "block";
+
+    if (isCorrect) {
+      feedbackMessage.textContent = `Correct! +${currentCard.points} points`;
+      feedbackMessage.className = "correct";
+      currentScore += currentCard.points;
+      console.log("Score updated:", currentScore);
+    } else {
+      feedbackMessage.textContent = `Incorrect. The correct answer was: ${currentCard.answer}`;
+      feedbackMessage.className = "incorrect";
+    }
+
+    questionText.textContent = currentCard.answer;
+    isShowingQuestion = false;
+
+    userAnswerInput.disabled = true;
+    submitButton.disabled = true;
+  }
 
   // Update the endDeck function
   const endDeck = () => {
@@ -878,34 +1013,42 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!deck) return;
 
     const currentCard = deck.flashcards[currentCardIndex];
+    const userAnswerInput = document.getElementById("user-answer");
+    const feedbackMessage = document.getElementById("feedback-message");
+    const questionText = document.getElementById("question-text");
+
     const userAnswer = userAnswerInput.value.trim().toLowerCase();
     const correctAnswer = currentCard.answer.toLowerCase();
+
+    // Debug logging
+    console.log("Answer Check:", {
+      userInput: userAnswer,
+      correctAnswer: correctAnswer,
+      isExactMatch: userAnswer === correctAnswer,
+      currentCard: currentCard,
+    });
 
     feedbackMessage.style.display = "block";
 
     if (userAnswer === correctAnswer) {
-      // Correct answer
-      feedbackMessage.textContent = `Correct answer! +${
-        currentCard.points || 1
-      } points`;
+      feedbackMessage.textContent = `Correct! +${currentCard.points} points`;
       feedbackMessage.className = "correct";
-      currentScore += currentCard.points || 1;
+      currentScore += currentCard.points;
+      console.log("Score updated:", currentScore);
     } else {
-      // Incorrect answer
-      feedbackMessage.textContent = "Incorrect answer";
+      feedbackMessage.textContent = `Incorrect. The correct answer was: ${currentCard.answer}`;
       feedbackMessage.className = "incorrect";
     }
 
-    // Show the correct answer
-    setTimeout(() => {
-      const questionText = document.getElementById("question-text");
-      questionText.textContent = currentCard.answer;
-      isShowingQuestion = false;
-    }, 1000);
-
-    // Clear the input field
+    questionText.textContent = currentCard.answer;
+    isShowingQuestion = false;
     userAnswerInput.value = "";
   }
+
+  // Make sure the submit button is properly connected
+  document
+    .getElementById("submit-answer")
+    .addEventListener("click", checkAnswer);
 
   // Update the next card function to reset the answer section
   document.getElementById("next-flashcard").addEventListener("click", () => {
@@ -914,12 +1057,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     currentCardIndex = (currentCardIndex + 1) % deck.flashcards.length;
     const questionText = document.getElementById("question-text");
+    const userAnswerInput = document.getElementById("user-answer");
+    const feedbackMessage = document.getElementById("feedback-message");
+    const submitButton = document.getElementById("submit-answer");
+
+    // Clear the input and feedback for the next question
+    userAnswerInput.value = "";
+    userAnswerInput.disabled = false;
+    submitButton.disabled = false;
+    feedbackMessage.style.display = "none";
+
+    // Show next question
     questionText.textContent = deck.flashcards[currentCardIndex].question;
     isShowingQuestion = true;
 
-    // Reset answer section
-    userAnswerInput.value = "";
-    feedbackMessage.style.display = "none";
+    console.log("Next Card:", {
+      question: deck.flashcards[currentCardIndex].question,
+      answer: deck.flashcards[currentCardIndex].answer,
+      points: deck.flashcards[currentCardIndex].points,
+      cardIndex: currentCardIndex + 1,
+      totalCards: deck.flashcards.length,
+    });
   });
 
   // Create a helper function for event listeners
