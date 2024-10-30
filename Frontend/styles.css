@@ -1164,3 +1164,15 @@ body[data-theme="dark"] #question-counter {
   position: relative;
   /* ... rest of your existing flashcard styles ... */
 }
+
+.submit-score-btn {
+  background-color: #28a745 !important; /* Green background */
+  color: white !important;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.submit-score-btn:hover {
+  background-color: #218838 !important;
+  transform: scale(1.05);
+}

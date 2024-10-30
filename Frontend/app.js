@@ -1091,15 +1091,27 @@ document.addEventListener("DOMContentLoaded", () => {
       deck.flashcards.length
     );
 
-    // Update the counter immediately
+    // Check if we're at the last card
+    if (currentCardIndex >= deck.flashcards.length - 1) {
+      // Change the next button to a submit score button
+      const nextButton = document.getElementById("next-flashcard");
+      nextButton.textContent = "Submit Score";
+      nextButton.className = "submit-score-btn"; // Add this class for styling
+
+      // Remove the nextCard event listener and add the submit score listener
+      nextButton.removeEventListener("click", nextCard);
+      nextButton.addEventListener("click", () => {
+        showScoreSummary();
+        // Reset the button after showing summary
+        nextButton.textContent = "Next";
+        nextButton.className = ""; // Remove submit score styling
+        nextButton.addEventListener("click", nextCard);
+      });
+    }
+
+    // Update the counter
     const questionCounter = document.getElementById("current-question");
     questionCounter.textContent = (currentCardIndex + 1).toString();
-
-    // Reset if we've reached the end
-    if (currentCardIndex >= deck.flashcards.length) {
-      currentCardIndex = 0;
-      questionCounter.textContent = "1";
-    }
 
     // Reset card state
     const questionText = document.getElementById("question-text");
