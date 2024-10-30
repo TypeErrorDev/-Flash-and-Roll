@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+  let currentScore = 0;
+  let totalPossibleScore = 0;
   // First, define the DEFAULT_DECK constant
   const DEFAULT_DECK = {
     name: "JavaScript Info",
@@ -830,17 +832,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const startDeck = (deckName) => {
     const deck = decks.find((d) => d.name === deckName);
-    if (!deck) return;
+    if (!deck) {
+      console.error("Deck not found:", deckName);
+      return;
+    }
+
+    // Debug log
+    console.log("Starting deck:", deck);
 
     // Set the current deck name
     currentDeck = deckName;
 
     // Show flashcard container
     DOM.flashcard.container.style.display = "block";
+    document.getElementById("decks-container").style.display = "none";
 
-    // Initialize deck state
+    // Initialize deck state and scores
     currentCardIndex = 0;
     currentScore = 0;
+    totalPossibleScore = deck.flashcards.reduce(
+      (total, card) => total + card.points,
+      0
+    );
+
+    // Update score display
+    document.getElementById("current-score").textContent = currentScore;
+    document.getElementById("total-possible").textContent = totalPossibleScore;
 
     // Get DOM elements once
     const questionText = document.getElementById("question-text");
@@ -848,38 +865,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const feedbackMessage = document.getElementById("feedback-message");
     const submitButton = document.getElementById("submit-answer");
 
-    // Clear any previous event listeners
-    const newSubmitButton = submitButton.cloneNode(true);
-    submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
+    // Debug log
+    console.log(
+      "Setting question text:",
+      deck.flashcards[currentCardIndex].question
+    );
 
-    // Add new event listeners
-    newSubmitButton.addEventListener("click", () => {
-      const answer = userAnswerInput.value;
-      console.log("Submit clicked, user answer:", answer);
-      checkAnswer(answer);
-    });
-
-    userAnswerInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        const answer = userAnswerInput.value;
-        console.log("Enter pressed, user answer:", answer);
-        checkAnswer(answer);
-      }
-    });
-
-    // Set initial card content
-    if (deck.flashcards && deck.flashcards.length > 0) {
-      questionText.textContent = deck.flashcards[currentCardIndex].question;
-      console.log("Initial card set:", deck.flashcards[currentCardIndex]);
-    }
+    // Set initial question
+    questionText.textContent = deck.flashcards[currentCardIndex].question;
 
     // Reset input and feedback
     userAnswerInput.value = "";
     userAnswerInput.disabled = false;
     feedbackMessage.style.display = "none";
+    submitButton.disabled = false;
+
+    console.log("Flashcard initialized:", {
+      question: questionText.textContent,
+      currentCard: deck.flashcards[currentCardIndex],
+      totalCards: deck.flashcards.length,
+    });
   };
 
-  function checkAnswer(userInput) {
+  function checkAnswer() {
     const deck = decks.find((d) => d.name === currentDeck);
     if (!deck) return;
 
@@ -888,71 +896,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const feedbackMessage = document.getElementById("feedback-message");
     const questionText = document.getElementById("question-text");
     const submitButton = document.getElementById("submit-answer");
+    const scoreDisplay = document.getElementById("current-score");
 
-    // Store original values
-    const originalUserInput = userInput;
-    const originalCorrectAnswer = currentCard.answer;
+    const userAnswer = userAnswerInput.value.trim().toLowerCase();
+    const correctAnswer = currentCard.answer.toLowerCase();
 
-    // Clean up both answers
-    const userAnswer = userInput.trim().toLowerCase();
-    const correctAnswer = currentCard.answer.trim().toLowerCase();
-
-    // SUPER detailed debugging
-    console.log("=== ANSWER DEBUGGING ===");
-    console.log("Original values:", {
-      userInput: originalUserInput,
-      correctAnswer: originalCorrectAnswer,
-    });
-
-    console.log("Cleaned values:", {
-      userAnswer: userAnswer,
+    // Debug logging
+    console.log("Answer Check:", {
+      userInput: userAnswer,
       correctAnswer: correctAnswer,
+      isExactMatch: userAnswer === correctAnswer,
+      currentCard: currentCard,
     });
-
-    console.log("String lengths:", {
-      userOriginal: originalUserInput.length,
-      userCleaned: userAnswer.length,
-      correctOriginal: originalCorrectAnswer.length,
-      correctCleaned: correctAnswer.length,
-    });
-
-    console.log("Character by character comparison:");
-    const maxLength = Math.max(userAnswer.length, correctAnswer.length);
-    for (let i = 0; i < maxLength; i++) {
-      console.log(`Position ${i}:`, {
-        userChar: userAnswer[i] || "END",
-        userCharCode: userAnswer[i] ? userAnswer[i].charCodeAt(0) : "N/A",
-        correctChar: correctAnswer[i] || "END",
-        correctCharCode: correctAnswer[i]
-          ? correctAnswer[i].charCodeAt(0)
-          : "N/A",
-        matches: userAnswer[i] === correctAnswer[i],
-      });
-    }
-
-    // Try multiple comparison methods
-    const exactMatch = userAnswer === correctAnswer;
-    const looseMatch =
-      userAnswer.replace(/\s+/g, "") === correctAnswer.replace(/\s+/g, "");
-    const includesMatch =
-      correctAnswer.includes(userAnswer) || userAnswer.includes(correctAnswer);
-
-    console.log("Match results:", {
-      exactMatch,
-      looseMatch,
-      includesMatch,
-    });
-
-    // For now, let's consider any of these matches as correct
-    const isCorrect = exactMatch || looseMatch || includesMatch;
 
     feedbackMessage.style.display = "block";
 
-    if (isCorrect) {
+    if (userAnswer === correctAnswer) {
+      // Update score
+      currentScore += currentCard.points;
+
+      // Update display
+      if (scoreDisplay) {
+        scoreDisplay.textContent = currentScore;
+        console.log("Score display updated:", {
+          newScore: currentScore,
+          displayedScore: scoreDisplay.textContent,
+        });
+      }
+
       feedbackMessage.textContent = `Correct! +${currentCard.points} points`;
       feedbackMessage.className = "correct";
-      currentScore += currentCard.points;
-      console.log("Score updated:", currentScore);
     } else {
       feedbackMessage.textContent = `Incorrect. The correct answer was: ${currentCard.answer}`;
       feedbackMessage.className = "incorrect";
@@ -960,9 +933,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     questionText.textContent = currentCard.answer;
     isShowingQuestion = false;
-
     userAnswerInput.disabled = true;
     submitButton.disabled = true;
+    userAnswerInput.value = "";
   }
 
   // Update the endDeck function
@@ -1007,43 +980,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .addEventListener("click", checkAnswer);
   const userAnswerInput = document.getElementById("user-answer");
   const feedbackMessage = document.getElementById("feedback-message");
-
-  function checkAnswer() {
-    const deck = decks.find((d) => d.name === currentDeck);
-    if (!deck) return;
-
-    const currentCard = deck.flashcards[currentCardIndex];
-    const userAnswerInput = document.getElementById("user-answer");
-    const feedbackMessage = document.getElementById("feedback-message");
-    const questionText = document.getElementById("question-text");
-
-    const userAnswer = userAnswerInput.value.trim().toLowerCase();
-    const correctAnswer = currentCard.answer.toLowerCase();
-
-    // Debug logging
-    console.log("Answer Check:", {
-      userInput: userAnswer,
-      correctAnswer: correctAnswer,
-      isExactMatch: userAnswer === correctAnswer,
-      currentCard: currentCard,
-    });
-
-    feedbackMessage.style.display = "block";
-
-    if (userAnswer === correctAnswer) {
-      feedbackMessage.textContent = `Correct! +${currentCard.points} points`;
-      feedbackMessage.className = "correct";
-      currentScore += currentCard.points;
-      console.log("Score updated:", currentScore);
-    } else {
-      feedbackMessage.textContent = `Incorrect. The correct answer was: ${currentCard.answer}`;
-      feedbackMessage.className = "incorrect";
-    }
-
-    questionText.textContent = currentCard.answer;
-    isShowingQuestion = false;
-    userAnswerInput.value = "";
-  }
 
   // Make sure the submit button is properly connected
   document
