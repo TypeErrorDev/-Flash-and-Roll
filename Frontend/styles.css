@@ -1088,3 +1088,79 @@ body[data-theme="dark"] #score-display {
 #score-display.updated {
   background-color: #28a745;
 }
+
+#score-summary-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#score-summary-modal .modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+body[data-theme="dark"] #score-summary-modal .modal-content {
+  background-color: #333;
+  color: white;
+}
+
+.summary-stats {
+  margin: 20px 0;
+}
+
+.stat {
+  margin: 10px 0;
+  font-size: 1.2em;
+}
+
+#performance-message {
+  margin: 20px 0;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+#close-summary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+#close-summary:hover {
+  background-color: #0056b3;
+}
+
+#question-counter {
+  color: #6c757d;
+  font-size: 0.85em;
+  font-weight: 600;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  margin: 0;
+}
+
+body[data-theme="dark"] #question-counter {
+  color: #adb5bd;
+}
+
+/* Make sure the flashcard has relative positioning */
+#flashcard {
+  position: relative;
+  /* ... rest of your existing flashcard styles ... */
+}

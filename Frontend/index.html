@@ -114,6 +114,10 @@
           <span id="total-possible">0</span> points
         </div>
         <div id="flashcard">
+          <div id="question-counter">
+            Question <span id="current-question">1</span> of
+            <span id="total-questions">0</span>
+          </div>
           <div id="question-text"></div>
           <div id="answer-section">
             <input
@@ -203,6 +207,25 @@
           <button class="save-edit">Save</button>
           <button class="cancel-edit">Cancel</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Add this after your flashcard container -->
+    <div id="score-summary-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h2>Study Session Complete!</h2>
+        <div class="summary-stats">
+          <div class="stat">
+            <span>Final Score:</span>
+            <span id="final-score">0</span> / <span id="final-possible">0</span>
+          </div>
+          <div class="stat">
+            <span>Percentage:</span>
+            <span id="final-percentage">0%</span>
+          </div>
+        </div>
+        <div id="performance-message"></div>
+        <button id="close-summary">Continue</button>
       </div>
     </div>
 

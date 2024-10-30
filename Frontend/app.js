@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   let currentScore = 0;
   let totalPossibleScore = 0;
+  let currentCardIndex = 0;
+  let currentDeck = "";
+  let isShowingQuestion = true;
   // First, define the DEFAULT_DECK constant
   const DEFAULT_DECK = {
     name: "JavaScript Info",
@@ -832,20 +835,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const startDeck = (deckName) => {
     const deck = decks.find((d) => d.name === deckName);
-    if (!deck) {
-      console.error("Deck not found:", deckName);
-      return;
-    }
-
-    // Debug log
-    console.log("Starting deck:", deck);
+    if (!deck) return;
 
     // Set the current deck name
     currentDeck = deckName;
 
     // Show flashcard container
     DOM.flashcard.container.style.display = "block";
-    document.getElementById("decks-container").style.display = "none";
 
     // Initialize deck state and scores
     currentCardIndex = 0;
@@ -859,32 +855,28 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("current-score").textContent = currentScore;
     document.getElementById("total-possible").textContent = totalPossibleScore;
 
+    // Update question counter with actual card index
+    document.getElementById("current-question").textContent = (
+      currentCardIndex + 1
+    ).toString();
+    document.getElementById("total-questions").textContent =
+      deck.flashcards.length;
+
     // Get DOM elements once
     const questionText = document.getElementById("question-text");
     const userAnswerInput = document.getElementById("user-answer");
     const feedbackMessage = document.getElementById("feedback-message");
     const submitButton = document.getElementById("submit-answer");
 
-    // Debug log
-    console.log(
-      "Setting question text:",
-      deck.flashcards[currentCardIndex].question
-    );
-
-    // Set initial question
-    questionText.textContent = deck.flashcards[currentCardIndex].question;
+    // Set initial card content
+    if (deck.flashcards && deck.flashcards.length > 0) {
+      questionText.textContent = deck.flashcards[currentCardIndex].question;
+    }
 
     // Reset input and feedback
     userAnswerInput.value = "";
     userAnswerInput.disabled = false;
     feedbackMessage.style.display = "none";
-    submitButton.disabled = false;
-
-    console.log("Flashcard initialized:", {
-      question: questionText.textContent,
-      currentCard: deck.flashcards[currentCardIndex],
-      totalCards: deck.flashcards.length,
-    });
   };
 
   function checkAnswer() {
@@ -898,32 +890,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitButton = document.getElementById("submit-answer");
     const scoreDisplay = document.getElementById("current-score");
 
+    // Debug log
+    console.log("Checking answer for card:", currentCardIndex + 1);
+
     const userAnswer = userAnswerInput.value.trim().toLowerCase();
     const correctAnswer = currentCard.answer.toLowerCase();
-
-    // Debug logging
-    console.log("Answer Check:", {
-      userInput: userAnswer,
-      correctAnswer: correctAnswer,
-      isExactMatch: userAnswer === correctAnswer,
-      currentCard: currentCard,
-    });
 
     feedbackMessage.style.display = "block";
 
     if (userAnswer === correctAnswer) {
-      // Update score
       currentScore += currentCard.points;
-
-      // Update display
-      if (scoreDisplay) {
-        scoreDisplay.textContent = currentScore;
-        console.log("Score display updated:", {
-          newScore: currentScore,
-          displayedScore: scoreDisplay.textContent,
-        });
-      }
-
+      scoreDisplay.textContent = currentScore;
       feedbackMessage.textContent = `Correct! +${currentCard.points} points`;
       feedbackMessage.className = "correct";
     } else {
@@ -935,7 +912,11 @@ document.addEventListener("DOMContentLoaded", () => {
     isShowingQuestion = false;
     userAnswerInput.disabled = true;
     submitButton.disabled = true;
-    userAnswerInput.value = "";
+
+    // Update counter here as well
+    document.getElementById("current-question").textContent = (
+      currentCardIndex + 1
+    ).toString();
   }
 
   // Update the endDeck function
@@ -987,34 +968,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .addEventListener("click", checkAnswer);
 
   // Update the next card function to reset the answer section
-  document.getElementById("next-flashcard").addEventListener("click", () => {
-    const deck = decks.find((d) => d.name === currentDeck);
-    if (!deck) return;
-
-    currentCardIndex = (currentCardIndex + 1) % deck.flashcards.length;
-    const questionText = document.getElementById("question-text");
-    const userAnswerInput = document.getElementById("user-answer");
-    const feedbackMessage = document.getElementById("feedback-message");
-    const submitButton = document.getElementById("submit-answer");
-
-    // Clear the input and feedback for the next question
-    userAnswerInput.value = "";
-    userAnswerInput.disabled = false;
-    submitButton.disabled = false;
-    feedbackMessage.style.display = "none";
-
-    // Show next question
-    questionText.textContent = deck.flashcards[currentCardIndex].question;
-    isShowingQuestion = true;
-
-    console.log("Next Card:", {
-      question: deck.flashcards[currentCardIndex].question,
-      answer: deck.flashcards[currentCardIndex].answer,
-      points: deck.flashcards[currentCardIndex].points,
-      cardIndex: currentCardIndex + 1,
-      totalCards: deck.flashcards.length,
-    });
-  });
+  document.getElementById("next-flashcard").addEventListener("click", nextCard);
 
   // Create a helper function for event listeners
   const addEventListeners = (elements, eventType, callback) => {
@@ -1075,4 +1029,89 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeThemeToggle();
     // ... rest of your initialization code
   });
+
+  // Add this function to show the score summary
+  function showScoreSummary() {
+    const summaryModal = document.getElementById("score-summary-modal");
+    const finalScore = document.getElementById("final-score");
+    const finalPossible = document.getElementById("final-possible");
+    const finalPercentage = document.getElementById("final-percentage");
+    const performanceMessage = document.getElementById("performance-message");
+
+    // Calculate percentage
+    const percentage = (currentScore / totalPossibleScore) * 100;
+
+    // Update summary elements
+    finalScore.textContent = currentScore;
+    finalPossible.textContent = totalPossibleScore;
+    finalPercentage.textContent = `${percentage.toFixed(1)}%`;
+
+    // Set performance message based on percentage
+    if (percentage === 100) {
+      performanceMessage.textContent = "Perfect Score! Outstanding!";
+    } else if (percentage >= 80) {
+      performanceMessage.textContent = "Great job! Keep it up!";
+    } else if (percentage >= 60) {
+      performanceMessage.textContent = "Good work! Room for improvement.";
+    } else {
+      performanceMessage.textContent = "Keep practicing, you'll get better!";
+    }
+
+    // Show the modal
+    summaryModal.style.display = "flex";
+  }
+
+  // Update your close button event listener
+  document.getElementById("close-flashcard").addEventListener("click", () => {
+    showScoreSummary();
+  });
+
+  // Add event listener for the continue button
+  document.getElementById("close-summary").addEventListener("click", () => {
+    document.getElementById("score-summary-modal").style.display = "none";
+    document.getElementById("flashcard-container").style.display = "none";
+    document.getElementById("decks-container").style.display = "block";
+
+    // Reset scores
+    currentScore = 0;
+    totalPossibleScore = 0;
+  });
+
+  function nextCard() {
+    const deck = decks.find((d) => d.name === currentDeck);
+    if (!deck) return;
+
+    // Increment card index
+    currentCardIndex++;
+
+    console.log(
+      "Moving to card:",
+      currentCardIndex + 1,
+      "of",
+      deck.flashcards.length
+    );
+
+    // Update the counter immediately
+    const questionCounter = document.getElementById("current-question");
+    questionCounter.textContent = (currentCardIndex + 1).toString();
+
+    // Reset if we've reached the end
+    if (currentCardIndex >= deck.flashcards.length) {
+      currentCardIndex = 0;
+      questionCounter.textContent = "1";
+    }
+
+    // Reset card state
+    const questionText = document.getElementById("question-text");
+    const userAnswerInput = document.getElementById("user-answer");
+    const feedbackMessage = document.getElementById("feedback-message");
+    const submitButton = document.getElementById("submit-answer");
+
+    questionText.textContent = deck.flashcards[currentCardIndex].question;
+    userAnswerInput.value = "";
+    userAnswerInput.disabled = false;
+    feedbackMessage.style.display = "none";
+    submitButton.disabled = false;
+    isShowingQuestion = true;
+  }
 });
