@@ -4,10 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentCardIndex = 0;
   let currentDeck = "";
   let isShowingQuestion = true;
-
-  // ===========================
-  // Default Deck cards
-  // ===========================
+  // First, define the DEFAULT_DECK constant
   const DEFAULT_DECK = {
     name: "JavaScript Info",
     category: "JavaScript",
@@ -37,9 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
         answer: "handles async operations",
         points: 3,
       },
+      // ... rest of the flashcards ...
     ],
-    cardCount: 5,
-    totalPoints: 11,
+    cardCount: 20,
+    totalPoints: 40,
   };
 
   // Then define DOM elements
@@ -605,32 +603,38 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   // Theme Management
   // ===========================
-  const initializeTheme = () => {
-    const themeToggle = DOM.theme.toggle;
-    if (!themeToggle) return;
+  const ThemeManager = {
+    init() {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      this.setTheme(savedTheme);
 
-    // Check for saved theme preference
-    const savedTheme = localStorage.getItem("theme") || "light";
+      // Add click handler for theme icon
+      DOM.theme.icon.addEventListener("click", () => {
+        const currentTheme = document.body.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        this.setTheme(newTheme);
+      });
+    },
 
-    // Set initial theme
-    document.body.setAttribute("data-theme", savedTheme);
-    themeToggle.checked = savedTheme === "dark";
+    setTheme(theme) {
+      document.body.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
 
-    // Add event listener for theme toggle
-    themeToggle.addEventListener("change", (e) => {
-      const newTheme = e.target.checked ? "dark" : "light";
-      document.body.setAttribute("data-theme", newTheme);
-      localStorage.setItem("theme", newTheme);
-
-      // Update icons if they exist
+      // Update icons
       if (DOM.theme.sunIcon && DOM.theme.moonIcon) {
-        DOM.theme.sunIcon.style.display =
-          newTheme === "dark" ? "none" : "block";
-        DOM.theme.moonIcon.style.display =
-          newTheme === "dark" ? "block" : "none";
+        if (theme === "dark") {
+          DOM.theme.sunIcon.style.display = "none";
+          DOM.theme.moonIcon.style.display = "block";
+        } else {
+          DOM.theme.sunIcon.style.display = "block";
+          DOM.theme.moonIcon.style.display = "none";
+        }
       }
-    });
+    },
   };
+
+  // Initialize theme
+  ThemeManager.init();
 
   // ===========================
   // Confirm Modal Actions
@@ -1089,42 +1093,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Check if we're at the last card
     if (currentCardIndex >= deck.flashcards.length - 1) {
+      // Change the next button to a submit score button
       const nextButton = document.getElementById("next-flashcard");
+      nextButton.textContent = "Submit Score";
+      nextButton.className = "submit-score-btn"; // Add this class for styling
 
-      // Add fade out effect
-      nextButton.style.opacity = "0";
-      nextButton.style.transform = "scale(0.9)";
-      nextButton.style.transition = "all 0.3s ease";
-
-      // Change button after fade out
-      setTimeout(() => {
-        nextButton.textContent = "Submit Score";
-        nextButton.className = "submit-score-btn";
-
-        // Fade back in
-        nextButton.style.opacity = "1";
-        nextButton.style.transform = "scale(1)";
-
-        // Remove the nextCard event listener and add the submit score listener
-        nextButton.removeEventListener("click", nextCard);
-        nextButton.addEventListener("click", () => {
-          showScoreSummary();
-
-          // Reset button with animation
-          nextButton.style.opacity = "0";
-          setTimeout(() => {
-            nextButton.textContent = "Next";
-            nextButton.className = "";
-            nextButton.style.opacity = "1";
-            nextButton.addEventListener("click", nextCard);
-          }, 300);
-        });
-      }, 300);
+      // Remove the nextCard event listener and add the submit score listener
+      nextButton.removeEventListener("click", nextCard);
+      nextButton.addEventListener("click", () => {
+        showScoreSummary();
+        // Reset the button after showing summary
+        nextButton.textContent = "Next";
+        nextButton.className = ""; // Remove submit score styling
+        nextButton.addEventListener("click", nextCard);
+      });
     }
 
-    // Rest of your existing nextCard code...
-  }
+    // Update the counter
+    const questionCounter = document.getElementById("current-question");
+    questionCounter.textContent = (currentCardIndex + 1).toString();
 
-  // Add this to your initialization calls at the bottom
-  initializeTheme();
+    // Reset card state
+    const questionText = document.getElementById("question-text");
+    const userAnswerInput = document.getElementById("user-answer");
+    const feedbackMessage = document.getElementById("feedback-message");
+    const submitButton = document.getElementById("submit-answer");
+
+    questionText.textContent = deck.flashcards[currentCardIndex].question;
+    userAnswerInput.value = "";
+    userAnswerInput.disabled = false;
+    feedbackMessage.style.display = "none";
+    submitButton.disabled = false;
+    isShowingQuestion = true;
+  }
 });
