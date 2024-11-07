@@ -120,11 +120,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Authentication Check
   // ===========================
 
+  const fetchUserDecks = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/users/${userId}/decks`
+      );
+      if (!response.ok) throw new Error("Failed to fetch decks");
+      const decks = await response.json();
+      renderDecks(decks);
+    } catch (error) {
+      console.error("Error fetching decks:", error);
+    }
+  };
+
   const checkAuth = () => {
     console.log("Checking authentication...");
     const user = JSON.parse(localStorage.getItem("user"));
 
-    if (user) {
+    if (user && user.id) {
       console.log("User authenticated:", user.displayName);
       document.getElementById("user-name").textContent = user.displayName;
 
@@ -162,6 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       DOM.deck.container.style.display = "block";
       DOM.flashcard.container.style.display = "none";
+
+      fetchUserDecks(user.id);
     } else {
       console.log("No user authenticated");
       const menu = DOM.navbar.querySelector(".navbar-menu");
@@ -1124,4 +1139,31 @@ document.addEventListener("DOMContentLoaded", () => {
     submitButton.disabled = false;
     isShowingQuestion = true;
   }
+
+  const loginUser = async (username, displayName) => {
+    try {
+      const response = await fetch("http://localhost:3000/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, displayName }),
+      });
+
+      if (!response.ok) throw new Error("Failed to create user");
+      const userData = await response.json();
+      console.log("User created:", userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+    } catch (error) {
+      console.error("Error logging in:", error);
+    }
+  };
+
+  // Call this function when the user submits the login form
+  DOM.auth.form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = DOM.auth.displayNameInput.value.trim();
+    const displayName = username; // or another way to get displayName
+    loginUser(username, displayName);
+  });
 });

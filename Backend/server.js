@@ -79,6 +79,82 @@ app.post("/api/scores", (req, res) => {
   );
 });
 
+// Create a new user
+app.post("/api/users", (req, res) => {
+  console.log("Request body:", req.body);
+  const { username, displayName } = req.body;
+  if (!username || !displayName) {
+    return res
+      .status(400)
+      .json({ error: "Username and display name are required" });
+  }
+
+  console.log(`Creating user: ${username}, ${displayName}`);
+
+  db.run(
+    `INSERT INTO users (username, displayName) VALUES (?, ?)`,
+    [username, displayName],
+    function (err) {
+      if (err) {
+        console.error("Database error:", err.message);
+        return res.status(500).json({ error: err.message });
+      }
+      console.log(`User created with ID: ${this.lastID}`);
+      res.json({ id: this.lastID, message: "User created successfully" });
+    }
+  );
+});
+
+// Create a new deck
+app.post("/api/decks", (req, res) => {
+  const { userId, name, category, flashcards } = req.body;
+  if (!userId || !name || !flashcards) {
+    return res
+      .status(400)
+      .json({ error: "User ID, name, and flashcards are required" });
+  }
+
+  db.run(
+    `INSERT INTO decks (userId, name, category, flashcards) VALUES (?, ?, ?, ?)`,
+    [userId, name, category, JSON.stringify(flashcards)],
+    function (err) {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ error: err.message });
+      }
+      res.json({ id: this.lastID, message: "Deck created successfully" });
+    }
+  );
+});
+
+// Get decks for a user
+app.get("/api/users/:userId/decks", (req, res) => {
+  const { userId } = req.params;
+  db.all(`SELECT * FROM decks WHERE userId = ?`, [userId], (err, rows) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(
+      rows.map((row) => ({
+        ...row,
+        flashcards: JSON.parse(row.flashcards),
+      }))
+    );
+  });
+});
+
+// Get all users
+app.get("/api/users", (req, res) => {
+  db.all(`SELECT * FROM users`, (err, rows) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
 // Add a catch-all route for debugging
 app.use((req, res) => {
   console.log("404 for route:", req.url);
