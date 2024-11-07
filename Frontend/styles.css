@@ -14,6 +14,7 @@ body {
 
 .navbar-menu {
   display: flex;
+
   list-style: none;
   gap: 20px;
   margin: 0;
@@ -36,6 +37,7 @@ body {
   color: white;
   padding: 0 20px;
   display: flex;
+  /* flex-direction: c; */
   align-items: center;
   box-sizing: border-box;
   margin: 0 auto;
@@ -1159,14 +1161,12 @@ body[data-theme="dark"] #question-counter {
   color: #adb5bd;
 }
 
-/* Make sure the flashcard has relative positioning */
 #flashcard {
   position: relative;
-  /* ... rest of your existing flashcard styles ... */
 }
 
 .submit-score-btn {
-  background-color: #28a745 !important; /* Green background */
+  background-color: #28a745 !important;
   color: white !important;
   font-weight: bold;
   transition: all 0.3s ease;

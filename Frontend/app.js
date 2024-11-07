@@ -1,9 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // -----------------------------------
+  // Initialization and Variables
+  // -----------------------------------
   let currentScore = 0;
   let totalPossibleScore = 0;
   let currentCardIndex = 0;
   let currentDeck = "";
   let isShowingQuestion = true;
+
   // First, define the DEFAULT_DECK constant
   const DEFAULT_DECK = {
     name: "JavaScript Info",
@@ -12,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         question: "What is the difference between let and var?",
         answer: "block scope vs function scope",
-        points: 2,
+        points: 1,
       },
       {
         question: "What is a closure in JavaScript?",
@@ -34,13 +38,11 @@ document.addEventListener("DOMContentLoaded", () => {
         answer: "handles async operations",
         points: 3,
       },
-      // ... rest of the flashcards ...
     ],
-    cardCount: 20,
-    totalPoints: 40,
+    cardCount: 100,
+    totalPoints: 100,
   };
 
-  // Then define DOM elements
   const DOM = {
     navbar: document.getElementById("navbar"),
     auth: {
@@ -87,7 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
-  // Then define the loadDecksFromLocalStorage function that uses DEFAULT_DECK
+  // -----------------------------------
+  // Load Decks from Local Storage
+  // -----------------------------------
   const loadDecksFromLocalStorage = () => {
     const savedDecks = localStorage.getItem("decks");
     if (savedDecks) {
@@ -110,7 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Initialize decks array
   let decks = [];
 
   // ===========================
@@ -130,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       renderDecks();
       DOM.deck.container.style.display = "block";
+      DOM.leaderboard.container.style.display = "block";
 
       const menu = document.createElement("ul");
       menu.className = "navbar-menu";
@@ -167,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.settings.container.style.display = "none";
       DOM.deck.container.style.display = "none";
       DOM.flashcard.container.style.display = "none";
+      DOM.leaderboard.container.style.display = "none";
     }
   };
 
@@ -203,7 +208,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Rendering deck:",
                 deck.name,
                 "Category:",
-                deck.category
+                deck.category,
+                "Card Count:",
+                deck.cardCount,
+                "Total Points:",
+                deck.totalPoints
               );
 
               return `
@@ -640,43 +649,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // Confirm Modal Actions
   // ===========================
   const handleSignOut = () => {
-    // Show modal and add blur effect
     DOM.modal.confirm.style.display = "flex";
     document.body.classList.add("blur");
-
-    // Handle Yes button click
     DOM.modal.yesButton.addEventListener("click", () => {
-      // Clear all data
       localStorage.clear();
-
-      // Hide modal and remove blur
       DOM.modal.confirm.style.display = "none";
       document.body.classList.remove("blur");
-
-      // Reset UI state
       DOM.auth.container.style.display = "flex";
       DOM.deck.container.style.display = "none";
       DOM.settings.container.style.display = "none";
       DOM.flashcard.container.style.display = "none";
-
-      // Remove navbar menu
+      DOM.leaderboard.container.style.display = "none";
       const menu = DOM.navbar.querySelector(".navbar-menu");
       if (menu) menu.remove();
-
-      // Reload decks
       loadDecksFromLocalStorage();
     });
-
-    // Handle No button click
     DOM.modal.noButton.addEventListener("click", () => {
-      // Just hide modal and remove blur
       DOM.modal.confirm.style.display = "none";
       document.body.classList.remove("blur");
     });
-
-    // Handle Cancel button click
     DOM.modal.cancelButton.addEventListener("click", () => {
-      // Just hide modal and remove blur
       DOM.modal.confirm.style.display = "none";
       document.body.classList.remove("blur");
     });
