@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDeck = "";
   let isShowingQuestion = true;
 
+  let currentUser = null; // Global variable to store the current user
+
   // First, define the DEFAULT_DECK constant
   const DEFAULT_DECK = {
     name: "JavaScript Info",
@@ -135,18 +137,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const checkAuth = () => {
     console.log("Checking authentication...");
-    const user = JSON.parse(localStorage.getItem("user"));
+    if (currentUser && currentUser.id) {
+      console.log("User authenticated:", currentUser.displayName);
+      document.getElementById("user-name").textContent =
+        currentUser.displayName;
 
-    if (user && user.id) {
-      console.log("User authenticated:", user.displayName);
-      document.getElementById("user-name").textContent = user.displayName;
-
-      // Fetch and render decks for the authenticated user
-      fetchUserDecks(user.id);
-
-      renderDecks();
       DOM.deck.container.style.display = "block";
       DOM.leaderboard.container.style.display = "block";
+      DOM.auth.container.style.display = "none";
 
       const menu = document.createElement("ul");
       menu.className = "navbar-menu";
@@ -158,7 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (existingMenu) existingMenu.remove();
 
       DOM.navbar.appendChild(menu);
-      DOM.auth.container.style.display = "none";
       DOM.settings.container.style.display = "none";
 
       DOM.navbar.addEventListener("click", (e) => {
@@ -173,10 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      DOM.deck.container.style.display = "block";
       DOM.flashcard.container.style.display = "none";
-
-      fetchUserDecks(user.id);
     } else {
       console.log("No user authenticated");
       const menu = DOM.navbar.querySelector(".navbar-menu");
@@ -499,7 +493,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function saveDeckToLocalStorage() {
     console.log("Saving to localStorage:", decks); // Debug log
-    localStorage.setItem("decks", JSON.stringify(decks));
+    // localStorage.setItem("decks", JSON.stringify(decks)); // Commented out to prevent saving
   }
 
   // ===========================
@@ -618,9 +612,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
   DOM.auth.form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const displayName = DOM.auth.displayNameInput.value;
-    localStorage.setItem("user", JSON.stringify({ displayName }));
-    checkAuth();
+    const username = DOM.auth.displayNameInput.value.trim();
+    const displayName = username; // or another way to get displayName
+    loginUser(username, displayName);
   });
 
   // ===========================
@@ -1150,9 +1144,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // User exists, log in
         const userData = await checkResponse.json();
         console.log("User exists, logging in:", userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+        currentUser = userData; // Store user data in global variable
         fetchUserDecks(userData.id); // Fetch and display decks for the user
-        checkAuth(); // Update UI based on login status
+        checkAuth(); // Ensure this is called to update the UI
       } else if (checkResponse.status === 404) {
         // User does not exist, create new user
         console.log("User not found, creating new user:", username);
@@ -1167,9 +1161,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!createResponse.ok) throw new Error("Failed to create user");
         const newUserData = await createResponse.json();
         console.log("New user created:", newUserData);
-        localStorage.setItem("user", JSON.stringify(newUserData));
+        currentUser = newUserData; // Store new user data in global variable
         fetchUserDecks(newUserData.id); // Fetch and display decks for the new user
-        checkAuth(); // Update UI based on login status
+        checkAuth(); // Ensure this is called to update the UI
       } else {
         throw new Error("Unexpected error occurred");
       }
