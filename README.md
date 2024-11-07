@@ -58,8 +58,8 @@
 
 ## Functionality that breaks
 
-:beetle: Decks created are not persistent on logout yet. Need to debug userId => deck association :disappointed:
-:beetle: Score summary is not passed to `leaderboard.db` yet
-:beetle: Some multiple fetch issues with the Frontend fetching the Backend randomly
-:beetle: Also need to debug the settings theme toggle, doesn't want to work at the moment
-:beetle: Need to hide the top scores container when in settings
+- Decks created are not persistent on logout yet. Need to debug userId => deck association :disappointed: :beetle:
+- Score summary is not passed to `leaderboard.db` yet :beetle:
+- Some multiple fetch issues with the Frontend fetching the Backend randomly :beetle:
+- Also need to debug the settings theme toggle, doesn't want to work at the moment :beetle:
+- Need to hide the top scores container when in settings :beetle:
