@@ -123,6 +123,7 @@ app.post("/api/users", (req, res) => {
 
 // Create a new deck
 app.post("/api/decks", (req, res) => {
+  console.log("Request body for creating deck:", req.body);
   const { userId, name, category, flashcards } = req.body;
   if (!userId || !name || !flashcards) {
     return res

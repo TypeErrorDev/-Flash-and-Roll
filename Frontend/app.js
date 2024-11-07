@@ -137,21 +137,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const checkAuth = () => {
     console.log("Checking authentication...");
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      currentUser = JSON.parse(storedUser);
+    }
+
     if (currentUser && currentUser.id) {
       console.log("User authenticated:", currentUser.displayName);
       document.getElementById("user-name").textContent =
         currentUser.displayName;
 
+      // Ensure these elements are shown
       DOM.deck.container.style.display = "block";
       DOM.leaderboard.container.style.display = "block";
-      DOM.auth.container.style.display = "none";
+      DOM.auth.container.style.display = "none"; // Hide auth container
 
       const menu = document.createElement("ul");
       menu.className = "navbar-menu";
       menu.innerHTML = `
             <li id="settings-link">Settings</li>
             <li id="sign-out-link">Sign Out</li>
-          `;
+        `;
       const existingMenu = DOM.navbar.querySelector(".navbar-menu");
       if (existingMenu) existingMenu.remove();
 
@@ -294,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoryInput = document.getElementById("deck-category");
     const category = categoryInput ? categoryInput.value.trim() : "";
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem("currentUser"));
     if (!user || !user.id) {
       alert("User not authenticated");
       return;
@@ -1145,6 +1151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const userData = await checkResponse.json();
         console.log("User exists, logging in:", userData);
         currentUser = userData; // Store user data in global variable
+        localStorage.setItem("currentUser", JSON.stringify(currentUser)); // Persist user data
         fetchUserDecks(userData.id); // Fetch and display decks for the user
         checkAuth(); // Ensure this is called to update the UI
       } else if (checkResponse.status === 404) {
@@ -1162,6 +1169,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const newUserData = await createResponse.json();
         console.log("New user created:", newUserData);
         currentUser = newUserData; // Store new user data in global variable
+        localStorage.setItem("currentUser", JSON.stringify(currentUser)); // Persist user data
         fetchUserDecks(newUserData.id); // Fetch and display decks for the new user
         checkAuth(); // Ensure this is called to update the UI
       } else {
