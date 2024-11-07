@@ -39,15 +39,14 @@ app.get("/api/scores", (req, res) => {
   db.all(
     `SELECT username, score, datetime(date, 'localtime') as date
      FROM leaderboard 
-     ORDER BY score DESC 
-     LIMIT 5`,
+     ORDER BY score DESC`,
     (err, rows) => {
       if (err) {
         console.error("Database error:", err);
         res.status(500).json({ error: err.message });
         return;
       }
-      console.log("Sending top 5 scores:", rows);
+      console.log("Sending scores:", rows);
       res.json(rows);
     }
   );
