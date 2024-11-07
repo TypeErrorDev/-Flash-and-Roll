@@ -61,4 +61,5 @@
 - Decks created are not persistent on logout yet. Need to debug userId => deck association :disappointed:
 - Score summary is not passed to `leaderboard.db` yet
 - Some multiple fetch issues with the Frontend fetching the Backend randomly
--
+- Also need to debug the settings theme toggle, doesn't want to work at the moment
+- Need to hide the top scores container when in settings
