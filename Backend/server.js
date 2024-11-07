@@ -79,6 +79,22 @@ app.post("/api/scores", (req, res) => {
   );
 });
 
+// Check if a user exists
+app.get("/api/users/:username", (req, res) => {
+  const { username } = req.params;
+  db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
+    if (err) {
+      console.error("Database error:", err.message);
+      return res.status(500).json({ error: err.message });
+    }
+    if (row) {
+      res.json(row); // User exists
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  });
+});
+
 // Create a new user
 app.post("/api/users", (req, res) => {
   console.log("Request body:", req.body);

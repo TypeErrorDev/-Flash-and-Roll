@@ -24,47 +24,6 @@ const db = new sqlite3.Database("leaderboard.db", (err) => {
         }
       }
     );
-
-    db.serialize(() => {
-      // Create users table
-      db.run(
-        `
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                displayName TEXT NOT NULL
-            )
-            `,
-        (err) => {
-          if (err) {
-            console.error("Error creating users table:", err);
-          } else {
-            console.log("Users table ready");
-          }
-        }
-      );
-
-      // Create decks table
-      db.run(
-        `
-            CREATE TABLE IF NOT EXISTS decks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                userId INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                category TEXT,
-                flashcards TEXT, -- JSON string of flashcards
-                FOREIGN KEY(userId) REFERENCES users(id)
-            )
-            `,
-        (err) => {
-          if (err) {
-            console.error("Error creating decks table:", err);
-          } else {
-            console.log("Decks table ready");
-          }
-        }
-      );
-    });
   }
 });
 

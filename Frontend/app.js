@@ -141,8 +141,8 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("User authenticated:", user.displayName);
       document.getElementById("user-name").textContent = user.displayName;
 
-      // Load decks from localStorage
-      loadDecksFromLocalStorage();
+      // Fetch and render decks for the authenticated user
+      fetchUserDecks(user.id);
 
       renderDecks();
       DOM.deck.container.style.display = "block";
@@ -300,36 +300,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const categoryInput = document.getElementById("deck-category");
     const category = categoryInput ? categoryInput.value.trim() : "";
 
-    console.log("Category input element:", categoryInput);
-    console.log("Category value:", category);
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !user.id) {
+      alert("User not authenticated");
+      return;
+    }
 
     if (deckName && currentDeckFlashcards.length > 0 && category) {
-      // Calculate total points
-      const totalPoints = currentDeckFlashcards.reduce((sum, card) => {
-        return sum + Number(card.points);
-      }, 0);
-
       const newDeck = {
+        userId: user.id,
         name: deckName,
-        category: category, // Using the category from input
+        category: category,
         flashcards: currentDeckFlashcards,
-        cardCount: currentDeckFlashcards.length,
-        totalPoints: totalPoints,
       };
 
-      console.log("New deck being saved:", newDeck); // Debug log
+      console.log("New deck being saved:", newDeck);
 
-      decks.push(newDeck);
-      saveDeckToLocalStorage();
-      renderDecks();
-
-      // Reset form
-      DOM.deck.input.style.display = "none";
-      DOM.deck.addButton.style.display = "block";
-      DOM.deck.nameInput.value = "";
-      categoryInput.value = "";
-      currentDeckFlashcards = [];
-      updateFlashcardList();
+      fetch("http://localhost:3000/api/decks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newDeck),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Deck saved:", data);
+          fetchUserDecks(user.id);
+        })
+        .catch((error) => console.error("Error saving deck:", error));
     } else {
       alert("Please enter a deck name, category, and at least one flashcard.");
     }
@@ -1142,20 +1141,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const loginUser = async (username, displayName) => {
     try {
-      const response = await fetch("http://localhost:3000/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, displayName }),
-      });
+      console.log("Checking if user exists:", username);
+      const checkResponse = await fetch(
+        `http://localhost:3000/api/users/${username}`
+      );
 
-      if (!response.ok) throw new Error("Failed to create user");
-      const userData = await response.json();
-      console.log("User created:", userData);
-      localStorage.setItem("user", JSON.stringify(userData));
+      if (checkResponse.ok) {
+        // User exists, log in
+        const userData = await checkResponse.json();
+        console.log("User exists, logging in:", userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        fetchUserDecks(userData.id); // Fetch and display decks for the user
+        checkAuth(); // Update UI based on login status
+      } else if (checkResponse.status === 404) {
+        // User does not exist, create new user
+        console.log("User not found, creating new user:", username);
+        const createResponse = await fetch("http://localhost:3000/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, displayName }),
+        });
+
+        if (!createResponse.ok) throw new Error("Failed to create user");
+        const newUserData = await createResponse.json();
+        console.log("New user created:", newUserData);
+        localStorage.setItem("user", JSON.stringify(newUserData));
+        fetchUserDecks(newUserData.id); // Fetch and display decks for the new user
+        checkAuth(); // Update UI based on login status
+      } else {
+        throw new Error("Unexpected error occurred");
+      }
     } catch (error) {
-      console.error("Error logging in:", error);
+      console.error("Error logging in or creating user:", error);
     }
   };
 
