@@ -651,8 +651,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const handleSignOut = () => {
     DOM.modal.confirm.style.display = "flex";
     document.body.classList.add("blur");
-    DOM.modal.yesButton.addEventListener("click", () => {
-      localStorage.clear();
+
+    const signOut = () => {
       DOM.modal.confirm.style.display = "none";
       document.body.classList.remove("blur");
       DOM.auth.container.style.display = "flex";
@@ -663,11 +663,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const menu = DOM.navbar.querySelector(".navbar-menu");
       if (menu) menu.remove();
       loadDecksFromLocalStorage();
+    };
+
+    DOM.modal.yesButton.addEventListener("click", () => {
+      localStorage.clear(); // Clear local storage only on "Yes"
+      signOut();
     });
+
     DOM.modal.noButton.addEventListener("click", () => {
-      DOM.modal.confirm.style.display = "none";
-      document.body.classList.remove("blur");
+      signOut(); // Sign out without clearing local storage
     });
+
     DOM.modal.cancelButton.addEventListener("click", () => {
       DOM.modal.confirm.style.display = "none";
       document.body.classList.remove("blur");
