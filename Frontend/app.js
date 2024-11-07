@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDeck = "";
   let isShowingQuestion = true;
 
-  let currentUser = null; // Global variable to store the current user
+  let currentUser = null;
 
   // First, define the DEFAULT_DECK constant
   const DEFAULT_DECK = {
@@ -107,10 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       DEFAULT_DECK.totalPoints = totalPoints;
 
-      // Set default deck as the only deck
       decks = [DEFAULT_DECK];
 
-      // Save to localStorage
       localStorage.setItem("decks", JSON.stringify(decks));
       console.log("Created default deck:", decks);
     }
@@ -147,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("user-name").textContent =
         currentUser.displayName;
 
-      // Ensure these elements are shown
       DOM.deck.container.style.display = "block";
       DOM.leaderboard.container.style.display = "block";
       DOM.auth.container.style.display = "none"; // Hide auth container
@@ -461,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
         name: deckName,
         flashcards: currentDeckFlashcards,
         cardCount: currentDeckFlashcards.length,
-        category: category || "Uncategorized", // Use user input or fallback if empty
+        category: category || "Uncategorized",
         totalPoints: totalPoints,
       };
 
@@ -478,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.deck.input.style.display = "none";
       DOM.deck.addButton.style.display = "block";
       DOM.deck.nameInput.value = "";
-      document.getElementById("deck-category").value = ""; // Clear category input
+      document.getElementById("deck-category").value = "";
       currentDeckFlashcards = [];
       updateFlashcardList();
 
@@ -499,7 +496,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function saveDeckToLocalStorage() {
     console.log("Saving to localStorage:", decks); // Debug log
-    // localStorage.setItem("decks", JSON.stringify(decks)); // Commented out to prevent saving
   }
 
   // ===========================
@@ -507,7 +503,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===========================
 
   const openFlashcards = (deckName) => {
-    // const decksContainer = document.getElementById("decks-container");
     const flashcardContainer = document.getElementById("flashcard-container");
 
     // Find the selected deck
@@ -619,7 +614,7 @@ document.addEventListener("DOMContentLoaded", () => {
   DOM.auth.form.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = DOM.auth.displayNameInput.value.trim();
-    const displayName = username; // or another way to get displayName
+    const displayName = username;
     loginUser(username, displayName);
   });
 
@@ -701,17 +696,15 @@ document.addEventListener("DOMContentLoaded", () => {
   renderDecks();
   checkAuth();
 
-  // Make sure to call this function after the DOM is loaded
   addSettingsEventListeners();
 
-  // Move editDeck function inside the DOMContentLoaded scope
   function editDeck(deckName) {
     const deck = decks.find((d) => d.name === deckName);
     if (!deck) return;
 
     currentDeckFlashcards = [...deck.flashcards];
     DOM.deck.nameInput.value = deck.name;
-    document.getElementById("deck-category").value = deck.category; // Set the existing category
+    document.getElementById("deck-category").value = deck.category;
 
     DOM.deck.input.style.display = "block";
     DOM.deck.addButton.style.display = "none";
@@ -724,7 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.deck.saveButton.onclick = () => {
       const newDeckName = DOM.deck.nameInput.value.trim();
       const newCategory =
-        document.getElementById("deck-category").value.trim() || deck.category; // Use new category or keep existing
+        document.getElementById("deck-category").value.trim() || deck.category;
 
       if (newDeckName && currentDeckFlashcards.length > 0) {
         const deckIndex = decks.findIndex((d) => d.name === deckName);
@@ -769,8 +762,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const scores = await response.json();
 
-      // Filter scores based on criteria, e.g., top 10 scores
-      const filteredScores = scores.filter((score) => score.score >= 50); // Example criteria
+      const filteredScores = scores.filter((score) => score.score >= 50);
 
       const leaderboardBody = document.getElementById("leaderboard-body");
 
@@ -808,7 +800,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add this function to handle score submission
   const submitScore = async (score) => {
     try {
-      const user = JSON.parse(localStorage.getItem("currentUser")); // Use "currentUser" key
+      const user = JSON.parse(localStorage.getItem("currentUser"));
       console.log("Retrieved user from local storage:", user); // Debug log
       if (!user || !user.displayName) {
         console.error("No user found");
@@ -840,7 +832,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Call updateLeaderboard when the page loads
   updateLeaderboard();
 
   // Add this function to submit a new score
@@ -853,13 +844,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const deck = decks.find((d) => d.name === deckName);
     if (!deck) return;
 
-    // Set the current deck name
     currentDeck = deckName;
 
-    // Show flashcard container
     DOM.flashcard.container.style.display = "block";
 
-    // Initialize deck state and scores
     currentCardIndex = 0;
     currentScore = 0;
     totalPossibleScore = deck.flashcards.reduce(
@@ -1031,22 +1019,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const initializeThemeToggle = () => {
     const themeToggle = document.getElementById("theme-toggle");
     if (themeToggle) {
-      // Check if element exists
       const currentTheme = localStorage.getItem("theme") || "light";
       themeToggle.checked = currentTheme === "dark";
 
-      // Set initial theme
       document.body.setAttribute("data-theme", currentTheme);
     }
   };
 
-  // Call this after DOM content is loaded
   document.addEventListener("DOMContentLoaded", () => {
     initializeThemeToggle();
-    // ... rest of your initialization code
   });
 
-  // Add this function to show the score summary
   function showScoreSummary() {
     const deck = decks.find((d) => d.name === currentDeck);
     if (!deck) return;
@@ -1063,7 +1046,6 @@ document.addEventListener("DOMContentLoaded", () => {
       100
     ).toFixed(2);
 
-    // Ensure these elements exist
     const finalScoreElement = document.getElementById("final-score");
     const finalPossibleElement = document.getElementById("final-possible");
     const finalPercentageElement = document.getElementById("final-percentage");
@@ -1076,23 +1058,15 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Score summary elements not found");
       return;
     }
-
-    // Display the final score and possible score
     finalScoreElement.textContent = currentScore;
     finalPossibleElement.textContent = totalPossibleScore;
-
-    // Display the percentage of correct answers
     finalPercentageElement.textContent = `${correctPercentage}%`;
 
     scoreSummaryModal.style.display = "block";
   }
-
-  // Update your close button event listener
   document.getElementById("close-flashcard").addEventListener("click", () => {
     showScoreSummary();
   });
-
-  // Add event listener for the continue button
   document.getElementById("close-summary").addEventListener("click", () => {
     document.getElementById("score-summary-modal").style.display = "none";
     document.getElementById("flashcard-container").style.display = "none";
@@ -1156,15 +1130,13 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       if (checkResponse.ok) {
-        // User exists, log in
         const userData = await checkResponse.json();
         console.log("User exists, logging in:", userData);
-        currentUser = userData; // Store user data in global variable
-        localStorage.setItem("currentUser", JSON.stringify(currentUser)); // Persist user data
-        fetchUserDecks(userData.id); // Fetch and display decks for the user
-        checkAuth(); // Ensure this is called to update the UI
+        currentUser = userData;
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+        fetchUserDecks(userData.id);
+        checkAuth();
       } else if (checkResponse.status === 404) {
-        // User does not exist, create new user
         console.log("User not found, creating new user:", username);
         const createResponse = await fetch("http://localhost:3000/api/users", {
           method: "POST",
@@ -1177,10 +1149,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!createResponse.ok) throw new Error("Failed to create user");
         const newUserData = await createResponse.json();
         console.log("New user created:", newUserData);
-        currentUser = newUserData; // Store new user data in global variable
-        localStorage.setItem("currentUser", JSON.stringify(currentUser)); // Persist user data
-        fetchUserDecks(newUserData.id); // Fetch and display decks for the new user
-        checkAuth(); // Ensure this is called to update the UI
+        currentUser = newUserData;
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+        fetchUserDecks(newUserData.id);
+        checkAuth();
       } else {
         throw new Error("Unexpected error occurred");
       }
@@ -1188,12 +1160,10 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error logging in or creating user:", error);
     }
   };
-
-  // Call this function when the user submits the login form
   DOM.auth.form.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = DOM.auth.displayNameInput.value.trim();
-    const displayName = username; // or another way to get displayName
+    const displayName = username;
     loginUser(username, displayName);
   });
 });
