@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         points: 3,
       },
     ],
-    cardCount: 100,
+    cardCount: 5,
     totalPoints: 100,
   };
 
@@ -326,7 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .then((response) => response.json())
         .then((data) => {
           console.log("Deck saved:", data);
-          fetchUserDecks(user.id);
+          fetchUserDecks(user.id); // Refresh the deck list from the database
         })
         .catch((error) => console.error("Error saving deck:", error));
     } else {
@@ -769,6 +769,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const scores = await response.json();
 
+      // Filter scores based on criteria, e.g., top 10 scores
+      const filteredScores = scores.filter((score) => score.score >= 50); // Example criteria
+
       const leaderboardBody = document.getElementById("leaderboard-body");
 
       // Fade out existing scores
@@ -777,7 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         leaderboardBody.innerHTML = "";
 
-        scores.forEach((score, index) => {
+        filteredScores.forEach((score, index) => {
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${index + 1}</td>
@@ -805,7 +808,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add this function to handle score submission
   const submitScore = async (score) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = JSON.parse(localStorage.getItem("currentUser")); // Use "currentUser" key
+      console.log("Retrieved user from local storage:", user); // Debug log
       if (!user || !user.displayName) {
         console.error("No user found");
         return;
@@ -1044,33 +1048,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add this function to show the score summary
   function showScoreSummary() {
-    const summaryModal = document.getElementById("score-summary-modal");
-    const finalScore = document.getElementById("final-score");
-    const finalPossible = document.getElementById("final-possible");
-    const finalPercentage = document.getElementById("final-percentage");
-    const performanceMessage = document.getElementById("performance-message");
+    const deck = decks.find((d) => d.name === currentDeck);
+    if (!deck) return;
 
-    // Calculate percentage
-    const percentage = (currentScore / totalPossibleScore) * 100;
-
-    // Update summary elements
-    finalScore.textContent = currentScore;
-    finalPossible.textContent = totalPossibleScore;
-    finalPercentage.textContent = `${percentage.toFixed(1)}%`;
-
-    // Set performance message based on percentage
-    if (percentage === 100) {
-      performanceMessage.textContent = "Perfect Score! Outstanding!";
-    } else if (percentage >= 80) {
-      performanceMessage.textContent = "Great job! Keep it up!";
-    } else if (percentage >= 60) {
-      performanceMessage.textContent = "Good work! Room for improvement.";
-    } else {
-      performanceMessage.textContent = "Keep practicing, you'll get better!";
+    const scoreSummaryModal = document.getElementById("score-summary-modal");
+    if (!scoreSummaryModal) {
+      console.error("Score summary modal not found");
+      return;
     }
 
-    // Show the modal
-    summaryModal.style.display = "flex";
+    const totalFlashcards = deck.flashcards.length;
+    const correctPercentage = (
+      (currentScore / totalPossibleScore) *
+      100
+    ).toFixed(2);
+
+    // Ensure these elements exist
+    const finalScoreElement = document.getElementById("final-score");
+    const finalPossibleElement = document.getElementById("final-possible");
+    const finalPercentageElement = document.getElementById("final-percentage");
+
+    if (
+      !finalScoreElement ||
+      !finalPossibleElement ||
+      !finalPercentageElement
+    ) {
+      console.error("Score summary elements not found");
+      return;
+    }
+
+    // Display the final score and possible score
+    finalScoreElement.textContent = currentScore;
+    finalPossibleElement.textContent = totalPossibleScore;
+
+    // Display the percentage of correct answers
+    finalPercentageElement.textContent = `${correctPercentage}%`;
+
+    scoreSummaryModal.style.display = "block";
   }
 
   // Update your close button event listener
@@ -1104,21 +1118,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     // Check if we're at the last card
-    if (currentCardIndex >= deck.flashcards.length - 1) {
-      // Change the next button to a submit score button
-      const nextButton = document.getElementById("next-flashcard");
-      nextButton.textContent = "Submit Score";
-      nextButton.className = "submit-score-btn"; // Add this class for styling
-
-      // Remove the nextCard event listener and add the submit score listener
-      nextButton.removeEventListener("click", nextCard);
-      nextButton.addEventListener("click", () => {
-        showScoreSummary();
-        // Reset the button after showing summary
-        nextButton.textContent = "Next";
-        nextButton.className = ""; // Remove submit score styling
-        nextButton.addEventListener("click", nextCard);
-      });
+    if (currentCardIndex >= deck.flashcards.length) {
+      showScoreSummary();
+      return;
     }
 
     // Update the counter
@@ -1131,7 +1133,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const feedbackMessage = document.getElementById("feedback-message");
     const submitButton = document.getElementById("submit-answer");
 
-    questionText.textContent = deck.flashcards[currentCardIndex].question;
+    // Ensure currentCardIndex is within bounds
+    if (currentCardIndex < deck.flashcards.length) {
+      questionText.textContent = deck.flashcards[currentCardIndex].question;
+    } else {
+      console.error("Current card index is out of bounds");
+      return;
+    }
+
     userAnswerInput.value = "";
     userAnswerInput.disabled = false;
     feedbackMessage.style.display = "none";

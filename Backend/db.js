@@ -1,5 +1,10 @@
 const sqlite3 = require("sqlite3").verbose();
 
+const logQuery = (sql, params) => {
+  console.log("Executing SQL:", sql);
+  console.log("With parameters:", params);
+};
+
 const db = new sqlite3.Database("leaderboard.db", (err) => {
   if (err) {
     console.error("Error opening database:", err);
@@ -9,13 +14,13 @@ const db = new sqlite3.Database("leaderboard.db", (err) => {
     // Create leaderboard table if it doesn't exist
     db.run(
       `
-            CREATE TABLE IF NOT EXISTS leaderboard (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL,
-                score INTEGER NOT NULL,
-                date DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        `,
+      CREATE TABLE IF NOT EXISTS leaderboard (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT NOT NULL,
+          score INTEGER NOT NULL,
+          date DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+      `,
       (err) => {
         if (err) {
           console.error("Error creating leaderboard table:", err);
@@ -28,12 +33,12 @@ const db = new sqlite3.Database("leaderboard.db", (err) => {
     // Create users table if it doesn't exist
     db.run(
       `
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                displayName TEXT NOT NULL
-            )
-        `,
+      CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT NOT NULL UNIQUE,
+          displayName TEXT NOT NULL
+      )
+      `,
       (err) => {
         if (err) {
           console.error("Error creating users table:", err);
@@ -46,15 +51,15 @@ const db = new sqlite3.Database("leaderboard.db", (err) => {
     // Create decks table if it doesn't exist
     db.run(
       `
-            CREATE TABLE IF NOT EXISTS decks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                userId INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                category TEXT,
-                flashcards TEXT,
-                FOREIGN KEY (userId) REFERENCES users(id)
-            )
-        `,
+      CREATE TABLE IF NOT EXISTS decks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          category TEXT,
+          flashcards TEXT,
+          FOREIGN KEY (userId) REFERENCES users(id)
+      )
+      `,
       (err) => {
         if (err) {
           console.error("Error creating decks table:", err);
@@ -66,4 +71,4 @@ const db = new sqlite3.Database("leaderboard.db", (err) => {
   }
 });
 
-module.exports = db;
+module.exports = { db, logQuery };

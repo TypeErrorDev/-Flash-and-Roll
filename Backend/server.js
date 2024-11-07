@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const db = require("./db");
+const { db, logQuery } = require("./db");
 
 const app = express();
 
@@ -57,26 +57,26 @@ app.get("/api/scores", (req, res) => {
 app.post("/api/scores", (req, res) => {
   console.log("Received request body:", req.body);
 
-  const { username, score, deckName } = req.body;
+  const { username, score } = req.body;
 
   if (!username || score === undefined) {
     return res.status(400).json({ error: "Username and score are required" });
   }
 
-  db.run(
-    `INSERT INTO leaderboard (username, score) VALUES (?, ?)`,
-    [username, score],
-    function (err) {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ error: err.message });
-      }
-      res.json({
-        id: this.lastID,
-        message: "Score saved successfully",
-      });
+  const sql = `INSERT INTO leaderboard (username, score) VALUES (?, ?)`;
+  const params = [username, score];
+  logQuery(sql, params);
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: err.message });
     }
-  );
+    res.json({
+      id: this.lastID,
+      message: "Score saved successfully",
+    });
+  });
 });
 
 // Check if a user exists
@@ -131,23 +131,27 @@ app.post("/api/decks", (req, res) => {
       .json({ error: "User ID, name, and flashcards are required" });
   }
 
-  db.run(
-    `INSERT INTO decks (userId, name, category, flashcards) VALUES (?, ?, ?, ?)`,
-    [userId, name, category, JSON.stringify(flashcards)],
-    function (err) {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ error: err.message });
-      }
-      res.json({ id: this.lastID, message: "Deck created successfully" });
+  const sql = `INSERT INTO decks (userId, name, category, flashcards) VALUES (?, ?, ?, ?)`;
+  const params = [userId, name, category, JSON.stringify(flashcards)];
+  logQuery(sql, params);
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: err.message });
     }
-  );
+    res.json({ id: this.lastID, message: "Deck created successfully" });
+  });
 });
 
 // Get decks for a user
 app.get("/api/users/:userId/decks", (req, res) => {
   const { userId } = req.params;
-  db.all(`SELECT * FROM decks WHERE userId = ?`, [userId], (err, rows) => {
+  const sql = `SELECT * FROM decks WHERE userId = ?`;
+  const params = [userId];
+  logQuery(sql, params);
+
+  db.all(sql, params, (err, rows) => {
     if (err) {
       console.error("Database error:", err);
       return res.status(500).json({ error: err.message });

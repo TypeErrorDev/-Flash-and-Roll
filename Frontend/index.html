@@ -144,13 +144,13 @@
             <thead>
               <tr>
                 <th>Rank</th>
-                <th>Player</th>
+                <th>Username</th>
                 <th>Score</th>
                 <th>Date</th>
               </tr>
             </thead>
             <tbody id="leaderboard-body">
-              <!-- Scores will be populated here -->
+              <!-- Scores will be dynamically inserted here -->
             </tbody>
           </table>
         </div>
@@ -227,6 +227,13 @@
         <div id="performance-message"></div>
         <button id="close-summary">Continue</button>
       </div>
+    </div>
+
+    <!-- Score Summary Modal -->
+    <div id="score-summary-modal" style="display: none">
+      <p>Total Flashcards: <span id="total-flashcards"></span></p>
+      <p>Correct Percentage: <span id="correct-percentage"></span></p>
+      <button id="close-summary">Close</button>
     </div>
 
     <script src="app.js"></script>
