@@ -7,7 +7,7 @@
 2. **Change Directory to Backend**
 
    - Run `npm i`
-   - Run `npm run dev`
+   - Run `npm run server`
 
 3. **Expected Terminal Output**
 
