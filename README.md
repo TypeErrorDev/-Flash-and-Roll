@@ -43,7 +43,7 @@
    - If it doesn't, just alt+F4 and skip this project
    - If it does populate, go to step 5
 
-5. Enter `Dustin` as the Username
+5. Enter your name as the Username
 
 ## Functionality that works
 
