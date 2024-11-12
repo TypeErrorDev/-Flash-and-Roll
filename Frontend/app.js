@@ -16,34 +16,104 @@ document.addEventListener("DOMContentLoaded", () => {
     category: "JavaScript",
     flashcards: [
       {
-        question: "What is the difference between let and var?",
-        answer: "block scope vs function scope",
-        points: 1,
-      },
-      {
         question: "What is a closure in JavaScript?",
-        answer: "function with access to outer scope",
+        answer:
+          "A closure is a function that has access to its own scope, the scope of the outer function, and the global scope.",
         points: 3,
       },
       {
-        question: "What is the purpose of 'use strict'?",
-        answer: "catches coding mistakes",
-        points: 1,
-      },
-      {
-        question: "What is the difference between == and ===?",
-        answer: "type coercion vs strict equality",
+        question:
+          "What is the difference between '==' and '===' in JavaScript?",
+        answer:
+          "'==' checks for value equality, while '===' checks for both value and type equality.",
         points: 2,
       },
       {
-        question: "What is a Promise in JavaScript?",
-        answer: "handles async operations",
+        question: "How do you declare a variable in JavaScript?",
+        answer: "You can declare a variable using var, let, or const.",
+        points: 1,
+      },
+      {
+        question: "What is 'this' keyword in JavaScript?",
+        answer:
+          "'this' refers to the object from which the function was called or the context in which the code is executed.",
+        points: 2,
+      },
+      {
+        question: "What are promises in JavaScript?",
+        answer:
+          "Promises are used to handle asynchronous operations and represent a value that may be available now, in the future, or never.",
         points: 3,
       },
+      {
+        question: "What does 'NaN' stand for and when is it used?",
+        answer:
+          "NaN stands for 'Not a Number' and is used to indicate that a value is not a legal number.",
+        points: 1,
+      },
+      {
+        question: "What are the six primitive data types in JavaScript?",
+        answer:
+          "The six primitive data types are string, number, bigint, boolean, undefined, and symbol.",
+        points: 2,
+      },
+      {
+        question: "How do you create an arrow function in JavaScript?",
+        answer:
+          "An arrow function is created using the syntax: (parameters) => expression.",
+        points: 1,
+      },
+      {
+        question: "Explain event bubbling in JavaScript.",
+        answer:
+          "Event bubbling is a type of event propagation where the event starts from the target element and propagates up to the root.",
+        points: 3,
+      },
+      {
+        question: "What is the purpose of the 'async' keyword in JavaScript?",
+        answer:
+          "The 'async' keyword is used to declare an asynchronous function, which returns a promise.",
+        points: 2,
+      },
+      {
+        question: "What is hoisting in JavaScript?",
+        answer:
+          "Hoisting is JavaScript's behavior of moving declarations to the top of the current scope, before code execution.",
+        points: 2,
+      },
+      {
+        question:
+          "What is the difference between null and undefined in JavaScript?",
+        answer:
+          "null is an assigned value that represents no value, while undefined means a variable has been declared but not assigned.",
+        points: 2,
+      },
+      {
+        question: "How does JavaScript handle asynchronous operations?",
+        answer:
+          "JavaScript handles asynchronous operations using callbacks, promises, and async/await.",
+        points: 3,
+      },
+      {
+        question: "What is the 'bind' method used for in JavaScript?",
+        answer:
+          "The 'bind' method creates a new function with a specific 'this' context and optionally some initial arguments.",
+        points: 3,
+      },
+      {
+        question: "How does JavaScript's event loop work?",
+        answer:
+          "The event loop handles asynchronous operations by managing a queue of callbacks, allowing non-blocking code execution.",
+        points: 5,
+      },
     ],
-    cardCount: 5,
-    totalPoints: 100,
   };
+
+  DEFAULT_DECK.cardCount = DEFAULT_DECK.flashcards.length;
+  DEFAULT_DECK.totalPoints = DEFAULT_DECK.flashcards.reduce(
+    (sum, card) => sum + Number(card.points),
+    0
+  );
 
   const DOM = {
     navbar: document.getElementById("navbar"),
@@ -100,15 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
       decks = JSON.parse(savedDecks);
       console.log("Loaded decks:", decks);
     } else {
-      // Calculate total points for default deck
-      const totalPoints = DEFAULT_DECK.flashcards.reduce(
-        (sum, card) => sum + Number(card.points),
-        0
-      );
-      DEFAULT_DECK.totalPoints = totalPoints;
-
       decks = [DEFAULT_DECK];
-
+      // Calculate total points for default deck
       localStorage.setItem("decks", JSON.stringify(decks));
       console.log("Created default deck:", decks);
     }
@@ -216,29 +279,18 @@ document.addEventListener("DOMContentLoaded", () => {
         <tbody>
           ${decks
             .map((deck) => {
-              console.log(
-                "Rendering deck:",
-                deck.name,
-                "Category:",
-                deck.category,
-                "Card Count:",
-                deck.cardCount,
-                "Total Points:",
-                deck.totalPoints
-              );
-
               return `
-                  <tr>
-                    <td><a href="#" class="deck-link" data-deck="${deck.name}">${deck.name}</a></td>
-                    <td>${deck.category}</td>
-                    <td>${deck.cardCount} cards</td>
-                    <td>${deck.totalPoints} points</td>
-                    <td>
-                      <button class="edit-btn" data-deck="${deck.name}">Edit</button>
-                      <button class="delete-btn" data-deck="${deck.name}">Delete</button>
-                    </td>
-                  </tr>
-                `;
+                <tr>
+                  <td><a href="#" class="deck-link" data-deck="${deck.name}">${deck.name}</a></td>
+                  <td>${deck.category}</td>
+                  <td>${deck.cardCount} cards</td>
+                  <td>${deck.totalPoints} points</td>
+                  <td>
+                    <button class="edit-btn" data-deck="${deck.name}">Edit</button>
+                    <button class="delete-btn" data-deck="${deck.name}">Delete</button>
+                  </td>
+                </tr>
+              `;
             })
             .join("")}
         </tbody>
@@ -258,7 +310,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (deckIndex !== -1) {
             decks.splice(deckIndex, 1);
             saveDeckToLocalStorage();
-            renderDecks();
           }
         }
       });
@@ -495,7 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function saveDeckToLocalStorage() {
-    console.log("Saving to localStorage:", decks); // Debug log
+    localStorage.setItem("decks", JSON.stringify(decks));
   }
 
   // ===========================
@@ -834,6 +885,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateLeaderboard();
 
+  // Add this function to handle score submission
+
   // Add this function to submit a new score
   const testButton = document.createElement("button");
   testButton.textContent = "Test Score Submission";
@@ -845,11 +898,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!deck) return;
 
     currentDeck = deckName;
+    currentCardIndex = 0;
+    currentScore = 0;
 
     DOM.flashcard.container.style.display = "block";
 
-    currentCardIndex = 0;
-    currentScore = 0;
     totalPossibleScore = deck.flashcards.reduce(
       (total, card) => total + card.points,
       0
@@ -890,32 +943,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentCard = deck.flashcards[currentCardIndex];
     const userAnswerInput = document.getElementById("user-answer");
     const feedbackMessage = document.getElementById("feedback-message");
-    const questionText = document.getElementById("question-text");
-    const submitButton = document.getElementById("submit-answer");
-    const scoreDisplay = document.getElementById("current-score");
-
-    // Debug log
-    console.log("Checking answer for card:", currentCardIndex + 1);
 
     const userAnswer = userAnswerInput.value.trim().toLowerCase();
     const correctAnswer = currentCard.answer.toLowerCase();
+
+    // const questionText = document.getElementById("question-text");
+    // const submitButton = document.getElementById("submit-answer");
+    // const scoreDisplay = document.getElementById("current-score");
+
+    // Debug log
+    console.log("Checking answer for card:", currentCardIndex + 1);
 
     feedbackMessage.style.display = "block";
 
     if (userAnswer === correctAnswer) {
       currentScore += currentCard.points;
-      scoreDisplay.textContent = currentScore;
+      document.getElementById("current-score").textContent = currentScore;
       feedbackMessage.textContent = `Correct! +${currentCard.points} points`;
       feedbackMessage.className = "correct";
     } else {
       feedbackMessage.textContent = `Incorrect. The correct answer was: ${currentCard.answer}`;
       feedbackMessage.className = "incorrect";
     }
-
-    questionText.textContent = currentCard.answer;
+    userAnswerInput.disabled = true;
+    // questionText.textContent = currentCard.answer;
     isShowingQuestion = false;
     userAnswerInput.disabled = true;
-    submitButton.disabled = true;
+    // submitButton.disabled = true;
 
     // Update counter here as well
     document.getElementById("current-question").textContent = (
@@ -1063,6 +1117,7 @@ document.addEventListener("DOMContentLoaded", () => {
     finalPercentageElement.textContent = `${correctPercentage}%`;
 
     scoreSummaryModal.style.display = "block";
+    // submitScore(currentScore);
   }
   document.getElementById("close-flashcard").addEventListener("click", () => {
     showScoreSummary();
