@@ -54,11 +54,12 @@
 - When you finish the deck, the score summary will calculate the points/percentage of correct answers
 - you can click Test Score Submission to see the top scores adjust
 - You can change themes from Light/Dark by clicking the Sun/Moon icon in the nav
+- Your decks card count and total possible points are calculated properly
 - You can signout properly
 
 ## Functionality that breaks
 
-- Decks created are not persistent on logout yet. Need to debug userId => deck association :disappointed: :beetle:
+- Decks created are not persistent for each user when signed out. Need to debug userId => deck association :disappointed: :beetle:
 - Score summary is not passed to `leaderboard.db` yet :beetle:
 - Some multiple fetch issues with the Frontend fetching the Backend randomly :beetle:
 - Also need to debug the settings theme toggle, doesn't want to work at the moment :beetle:
